@@ -1,7 +1,8 @@
 package com.os.cpu_schedulers;
 
+import javax.swing.*;
 import java.util.*;
-public class InputHandler {
+public class InputHandler extends JFrame {
     public static List<Process> getProcesses() {
         Scanner scanner = new Scanner(System.in);
         List<Process> processes = new ArrayList<>();
