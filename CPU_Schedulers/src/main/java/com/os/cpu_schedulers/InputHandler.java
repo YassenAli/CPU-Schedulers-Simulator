@@ -28,8 +28,8 @@ public class InputHandler extends JFrame {
             System.out.print("Priority (lower value = higher priority): ");
             int priority = scanner.nextInt();
 
-            Process process = new Process(name, color, arrivalTime, burstTime, priority);
-            processes.add(process);
+//            Process process = new Process(name, color, arrivalTime, burstTime, priority);
+//            processes.add(process);
         }
 
         System.out.println("\nProcesses have been initialized successfully.\n");

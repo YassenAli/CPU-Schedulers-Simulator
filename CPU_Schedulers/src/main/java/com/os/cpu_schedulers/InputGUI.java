@@ -3,7 +3,6 @@ package com.os.cpu_schedulers;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 public class InputGUI extends JFrame {
@@ -11,7 +10,8 @@ public class InputGUI extends JFrame {
     private int currentProcessIndex; // Index of the current process being entered
     private JPanel mainPanel; // Main panel for dynamic content
     private JTextField processNameField;
-    private JTextField processColorField;
+    private JPanel processColorPreview; // Panel to preview the selected color
+    private Color selectedColor; // Variable to store the selected color
     private JTextField arrivalTimeField;
     private JTextField burstTimeField;
     private JTextField priorityField;
@@ -85,16 +85,46 @@ public class InputGUI extends JFrame {
         mainPanel.repaint();
     }
 
-
     private void showProcessForm() {
         mainPanel.removeAll();
 
         JLabel titleLabel = new JLabel("Enter Details for Process " + currentProcessIndex, SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         mainPanel.add(titleLabel);
+        mainPanel.add(Box.createVerticalStrut(15));
 
         processNameField = createLabeledTextField("Process Name:");
-        processColorField = createLabeledTextField("Process Color:");
+
+        // Add color picker and preview
+        JLabel colorLabel = new JLabel("Pick Process Color:");
+        colorLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        mainPanel.add(colorLabel);
+
+        JPanel colorPanel = new JPanel();
+        colorPanel.setLayout(new BoxLayout(colorPanel, BoxLayout.X_AXIS));
+
+        processColorPreview = new JPanel();
+        processColorPreview.setPreferredSize(new Dimension(15, 15));
+        processColorPreview.setMinimumSize(new Dimension(50, 50));
+        processColorPreview.setMaximumSize(new Dimension(50, 50));
+        processColorPreview.setBackground(Color.BLACK); // Default color
+        selectedColor = Color.BLACK; // Default color
+
+        JButton colorButton = new JButton("Pick Color");
+        colorButton.addActionListener(e -> {
+            Color color = JColorChooser.showDialog(InputGUI.this, "Choose a color", selectedColor);
+            if (color != null) {
+                selectedColor = color;
+                processColorPreview.setBackground(color);
+            }
+        });
+
+        colorPanel.add(processColorPreview);
+        colorPanel.add(Box.createRigidArea(new Dimension(10, 0))); // Spacing
+        colorPanel.add(colorButton);
+
+        mainPanel.add(colorPanel);
+
         arrivalTimeField = createLabeledTextField("Arrival Time:");
         burstTimeField = createLabeledTextField("Burst Time:");
         priorityField = createLabeledTextField("Priority:");
@@ -102,6 +132,7 @@ public class InputGUI extends JFrame {
         JButton nextButton = new JButton(currentProcessIndex == totalProcesses ? "Finish" : "Next");
         nextButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         nextButton.addActionListener(e -> handleNextButton());
+        mainPanel.add(Box.createVerticalStrut(20));
         mainPanel.add(nextButton);
 
         mainPanel.revalidate();
@@ -115,6 +146,7 @@ public class InputGUI extends JFrame {
 
         JTextField textField = new JTextField();
         textField.setMaximumSize(new Dimension(300, 30));
+        textField.setAlignmentX(Component.CENTER_ALIGNMENT);
         mainPanel.add(textField);
 
         return textField;
@@ -122,29 +154,20 @@ public class InputGUI extends JFrame {
 
     private void handleNextButton() {
         String processName = processNameField.getText().trim();
-        String processColor = processColorField.getText().trim();
         int arrivalTime = Integer.parseInt(arrivalTimeField.getText().trim());
         int burstTime = Integer.parseInt(burstTimeField.getText().trim());
         int priority = Integer.parseInt(priorityField.getText().trim());
 
-//        if (processName.isEmpty() || processColor.isEmpty() || arrivalTime.isEmpty() ||
-//                burstTime.isEmpty() || priority.isEmpty()) {
-//            JOptionPane.showMessageDialog(this, "Please fill in all fields.");
-//            return;
-//        }
-
-
         // Create a new Process object and add it to the list
-        Process process = new Process(processName, processColor, arrivalTime, burstTime, priority);
+        Process process = new Process(processName, selectedColor, arrivalTime, burstTime, priority);
         processList.add(process);
 
-        // Process the entered details here (e.g., save to a list or database)
-//        System.out.println("Process " + currentProcessIndex + ":");
-//        System.out.println("Name: " + processName);
-//        System.out.println("Color: " + processColor);
-//        System.out.println("Arrival Time: " + arrivalTime);
-//        System.out.println("Burst Time: " + burstTime);
-//        System.out.println("Priority: " + priority);
+        System.out.println("Process " + currentProcessIndex + ":");
+        System.out.println("Name: " + processName);
+        System.out.println("Color: " + selectedColor);
+        System.out.println("Arrival Time: " + arrivalTime);
+        System.out.println("Burst Time: " + burstTime);
+        System.out.println("Priority: " + priority);
 
         // Move to the next process or finish
         if (currentProcessIndex < totalProcesses) {
@@ -152,10 +175,11 @@ public class InputGUI extends JFrame {
             showProcessForm();
         } else {
             JOptionPane.showMessageDialog(this, "All processes entered successfully!");
-            for(int i = 0 ; i < totalProcesses ; i++) {
-                System.out.println(processList.get(i));
+            for (Process p : processList) {
+                System.out.println(p);
             }
             dispose(); // Close the application or redirect as needed
+            SwingUtilities.invokeLater(() -> new ChooseSchedularGUI());
         }
     }
 
