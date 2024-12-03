@@ -139,12 +139,12 @@ public class InputGUI extends JFrame {
         processList.add(process);
 
         // Process the entered details here (e.g., save to a list or database)
-        System.out.println("Process " + currentProcessIndex + ":");
-        System.out.println("Name: " + processName);
-        System.out.println("Color: " + processColor);
-        System.out.println("Arrival Time: " + arrivalTime);
-        System.out.println("Burst Time: " + burstTime);
-        System.out.println("Priority: " + priority);
+//        System.out.println("Process " + currentProcessIndex + ":");
+//        System.out.println("Name: " + processName);
+//        System.out.println("Color: " + processColor);
+//        System.out.println("Arrival Time: " + arrivalTime);
+//        System.out.println("Burst Time: " + burstTime);
+//        System.out.println("Priority: " + priority);
 
         // Move to the next process or finish
         if (currentProcessIndex < totalProcesses) {
