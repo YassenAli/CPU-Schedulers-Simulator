@@ -179,7 +179,7 @@ public class InputGUI extends JFrame {
                 System.out.println(p);
             }
             dispose(); // Close the application or redirect as needed
-            SwingUtilities.invokeLater(() -> new ChooseSchedularGUI());
+            SwingUtilities.invokeLater(() -> new ChooseSchedularGUI(processList));
         }
     }
 

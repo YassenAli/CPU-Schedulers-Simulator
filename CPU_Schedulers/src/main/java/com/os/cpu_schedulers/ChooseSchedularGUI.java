@@ -1,12 +1,17 @@
 package com.os.cpu_schedulers;
+import  com.os.cpu_schedulers.SJFSchedulerGUI;
+import com.os.cpu_schedulers.InputGUI;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 public class ChooseSchedularGUI extends JFrame {
     private JPanel mainPanel;
 
-    public ChooseSchedularGUI() {
+    public ChooseSchedularGUI(ArrayList<Process> processList) {
         setTitle("Choose Scheduler GUI");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -26,8 +31,8 @@ public class ChooseSchedularGUI extends JFrame {
         titleLabel.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
         mainPanel.add(titleLabel);
 
-        // Add vertical spacing (50 pixels below the label)
-        mainPanel.add(Box.createVerticalStrut(50));
+
+        mainPanel.add(Box.createVerticalStrut(50));// space
 
         // Priority Scheduler Button
         JButton prioritySchedulerButton = new JButton("Priority Scheduler");
@@ -38,11 +43,16 @@ public class ChooseSchedularGUI extends JFrame {
         prioritySchedulerButton.setBorderPainted(false);
         prioritySchedulerButton.setFocusPainted(false);
 
-        // Add the first button to the panel
         mainPanel.add(prioritySchedulerButton);
 
-        // Add vertical spacing (30 pixels between buttons)
-        mainPanel.add(Box.createVerticalStrut(30));
+        prioritySchedulerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                PrioritySchedulerGUI prirorityScheulerGUI = new PrioritySchedulerGUI(processList);
+            }
+        });
+
+        mainPanel.add(Box.createVerticalStrut(30));// space between the buttons
 
         // SJF Scheduler Button
         JButton SJFSchedulerButton = new JButton("SJF Scheduler");
@@ -52,15 +62,20 @@ public class ChooseSchedularGUI extends JFrame {
         SJFSchedulerButton.setFont(new Font("Arial", Font.BOLD, 15));
         SJFSchedulerButton.setBorderPainted(false);
         SJFSchedulerButton.setFocusPainted(false);
-
         // Add the second button to the panel
         mainPanel.add(SJFSchedulerButton);
+
+        // open sjf form when click on the button
+        SJFSchedulerButton.addActionListener(e -> {
+            SJFSchedulerGUI sjfSchedulerGUI = new SJFSchedulerGUI(processList);
+            this.dispose();
+        });
 
 
         // Add vertical spacing (30 pixels between buttons)
         mainPanel.add(Box.createVerticalStrut(30));
 
-        // SJF Scheduler Button
+        // SRTF Scheduler Button
         JButton SRTFSchedulerButton = new JButton("SRTF Scheduler");
         SRTFSchedulerButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         SRTFSchedulerButton.setPreferredSize(new Dimension(450, 40));
@@ -76,7 +91,7 @@ public class ChooseSchedularGUI extends JFrame {
         // Add vertical spacing (30 pixels between buttons)
         mainPanel.add(Box.createVerticalStrut(30));
 
-        // SJF Scheduler Button
+        // FCAI Scheduler Button
         JButton FCAISchedulerButton = new JButton("FCAI Scheduler");
         FCAISchedulerButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         FCAISchedulerButton.setPreferredSize(new Dimension(450, 40));
@@ -88,6 +103,10 @@ public class ChooseSchedularGUI extends JFrame {
         mainPanel.add(FCAISchedulerButton);
 
         setVisible(true);
+    }
+
+    public ChooseSchedularGUI() {
+
     }
 
     public static void main(String[] args) {

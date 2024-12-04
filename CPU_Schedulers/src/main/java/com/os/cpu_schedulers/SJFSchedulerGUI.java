@@ -1,6 +1,7 @@
-package com.os.cpu_schedulers.Schedulers;
+package com.os.cpu_schedulers;
 
 import com.os.cpu_schedulers.Process;
+import com.os.cpu_schedulers.Schedulers.SJFScheduler;
 
 import javax.swing.*;
 import java.awt.*;
