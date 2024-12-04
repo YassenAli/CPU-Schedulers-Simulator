@@ -16,6 +16,8 @@ public class InputGUI extends JFrame {
     private JTextField burstTimeField;
     private JTextField priorityField;
     private ArrayList<Process> processList;
+    private int quantumTime ;
+    private int contextSwitch ;
     private JPanel panel1;
 
     public InputGUI() {
@@ -61,16 +63,39 @@ public class InputGUI extends JFrame {
         numProcessesField.setMaximumSize(new Dimension(200, 30));
         mainPanel.add(numProcessesField);
 
-        mainPanel.add(Box.createRigidArea(new Dimension(0, 20))); // Add vertical spacing
+
+        mainPanel.add(Box.createRigidArea(new Dimension(0 , 5)));
+        JLabel contextswitchLabel = new JLabel("Enter Context Switch : ");
+        contextswitchLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mainPanel.add(contextswitchLabel);
+        JTextField contextSwitchInput = new JTextField();
+        contextSwitchInput.setMaximumSize(new Dimension(200, 30));
+        mainPanel.add(contextSwitchInput);
+
+
+        mainPanel.add(Box.createRigidArea(new Dimension(0 , 5)));
+        JLabel quantumTimeLabel = new JLabel("Enter Quantum Time : ");
+        quantumTimeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        mainPanel.add(quantumTimeLabel);
+        JTextField quantumTimeInput = new JTextField();
+        quantumTimeInput.setMaximumSize(new Dimension(200, 30));
+        mainPanel.add(quantumTimeInput);
+
+        mainPanel.add(Box.createRigidArea(new Dimension(0 , 15)));
 
         JButton submitButton = new JButton("Submit");
         submitButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        submitButton.setMaximumSize(new Dimension(200, 30));
+        submitButton.setBackground(new Color(0 , 0 , 0));
+        submitButton.setForeground(Color.WHITE);
         mainPanel.add(submitButton);
 
         submitButton.addActionListener(e -> {
             try {
                 totalProcesses = Integer.parseInt(numProcessesField.getText().trim());
-                if (totalProcesses < 1) {
+                contextSwitch = Integer.parseInt(contextSwitchInput.getText().trim());
+                quantumTime = Integer.parseInt(quantumTimeInput.getText().trim());
+                if (totalProcesses < 1 || contextSwitch < 0 || quantumTime < 0) {
                     JOptionPane.showMessageDialog(this, "Please enter a positive number.");
                 } else {
                     currentProcessIndex = 1;
@@ -179,7 +204,7 @@ public class InputGUI extends JFrame {
                 System.out.println(p);
             }
             dispose(); // Close the application or redirect as needed
-            SwingUtilities.invokeLater(() -> new ChooseSchedularGUI(processList));
+            SwingUtilities.invokeLater(() -> new ChooseSchedularGUI(processList , contextSwitch , quantumTime));
         }
     }
 
