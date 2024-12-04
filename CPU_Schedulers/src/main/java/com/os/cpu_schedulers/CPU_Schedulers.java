@@ -23,7 +23,7 @@ public class CPU_Schedulers {
 
         switch (choice) {
 //            case 1 -> scheduler = new PriorityScheduler();
-//            case 2 -> scheduler = new SJFScheduler();
+            case 2 -> scheduler = new SJFScheduler(processes);
 //            case 3 -> scheduler = new SRTFScheduler();
             case 4 -> scheduler = new FCAIScheduler();
             default -> throw new IllegalArgumentException("Invalid choice");

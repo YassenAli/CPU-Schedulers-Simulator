@@ -1,7 +1,8 @@
 package com.os.cpu_schedulers;
 
+import javax.swing.*;
 import java.util.*;
-public class InputHandler {
+public class InputHandler extends JFrame {
     public static List<Process> getProcesses() {
         Scanner scanner = new Scanner(System.in);
         List<Process> processes = new ArrayList<>();
@@ -27,8 +28,8 @@ public class InputHandler {
             System.out.print("Priority (lower value = higher priority): ");
             int priority = scanner.nextInt();
 
-            Process process = new Process(name, color, arrivalTime, burstTime, priority);
-            processes.add(process);
+//            Process process = new Process(name, color, arrivalTime, burstTime, priority);
+//            processes.add(process);
         }
 
         System.out.println("\nProcesses have been initialized successfully.\n");

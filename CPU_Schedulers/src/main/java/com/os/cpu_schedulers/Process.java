@@ -1,8 +1,10 @@
 package com.os.cpu_schedulers;
 
+import java.awt.*;
+
 public class Process {
     private String name;
-    private String color;
+    private java.awt.Color color;
     private int arrivalTime;
     private int burstTime;
     private int priority;
@@ -12,7 +14,7 @@ public class Process {
     private int waitingTime;
     private int turnaroundTime;
 
-    public Process(String name, String color, int arrivalTime, int burstTime, int priority) {
+    public Process(String name, Color color, int arrivalTime, int burstTime, int priority) {
         this.name = name;
         this.color = color;
         this.arrivalTime = arrivalTime;
@@ -25,7 +27,7 @@ public class Process {
         return name;
     }
 
-    public String getColor() {
+    public Color getColor() {
         return color;
     }
 
