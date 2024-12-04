@@ -11,7 +11,7 @@ import java.util.ArrayList;
 public class ChooseSchedularGUI extends JFrame {
     private JPanel mainPanel;
 
-    public ChooseSchedularGUI(ArrayList<Process> processList , int contextSwitch , int quantumTime) {
+    public ChooseSchedularGUI(ArrayList<Process> processList , int contextSwitch) {
         setTitle("Choose Scheduler GUI");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());

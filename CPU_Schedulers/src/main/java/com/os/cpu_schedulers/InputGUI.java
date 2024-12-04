@@ -15,8 +15,8 @@ public class InputGUI extends JFrame {
     private JTextField arrivalTimeField;
     private JTextField burstTimeField;
     private JTextField priorityField;
+    private JTextField quantumTimeField;
     private ArrayList<Process> processList;
-    private int quantumTime ;
     private int contextSwitch ;
     private JPanel panel1;
 
@@ -73,14 +73,6 @@ public class InputGUI extends JFrame {
         mainPanel.add(contextSwitchInput);
 
 
-        mainPanel.add(Box.createRigidArea(new Dimension(0 , 5)));
-        JLabel quantumTimeLabel = new JLabel("Enter Quantum Time : ");
-        quantumTimeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        mainPanel.add(quantumTimeLabel);
-        JTextField quantumTimeInput = new JTextField();
-        quantumTimeInput.setMaximumSize(new Dimension(200, 30));
-        mainPanel.add(quantumTimeInput);
-
         mainPanel.add(Box.createRigidArea(new Dimension(0 , 15)));
 
         JButton submitButton = new JButton("Submit");
@@ -94,8 +86,7 @@ public class InputGUI extends JFrame {
             try {
                 totalProcesses = Integer.parseInt(numProcessesField.getText().trim());
                 contextSwitch = Integer.parseInt(contextSwitchInput.getText().trim());
-                quantumTime = Integer.parseInt(quantumTimeInput.getText().trim());
-                if (totalProcesses < 1 || contextSwitch < 0 || quantumTime < 0) {
+                if (totalProcesses < 1 || contextSwitch < 0) {
                     JOptionPane.showMessageDialog(this, "Please enter a positive number.");
                 } else {
                     currentProcessIndex = 1;
@@ -153,6 +144,7 @@ public class InputGUI extends JFrame {
         arrivalTimeField = createLabeledTextField("Arrival Time:");
         burstTimeField = createLabeledTextField("Burst Time:");
         priorityField = createLabeledTextField("Priority:");
+        quantumTimeField = createLabeledTextField("Quantum Time:");
 
         JButton nextButton = new JButton(currentProcessIndex == totalProcesses ? "Finish" : "Next");
         nextButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -182,9 +174,10 @@ public class InputGUI extends JFrame {
         int arrivalTime = Integer.parseInt(arrivalTimeField.getText().trim());
         int burstTime = Integer.parseInt(burstTimeField.getText().trim());
         int priority = Integer.parseInt(priorityField.getText().trim());
+        int quantumTime = Integer.parseInt(quantumTimeField.getText().trim());
 
         // Create a new Process object and add it to the list
-        Process process = new Process(processName, selectedColor, arrivalTime, burstTime, priority);
+        Process process = new Process(processName, selectedColor, arrivalTime, burstTime, priority , quantumTime);
         processList.add(process);
 
         System.out.println("Process " + currentProcessIndex + ":");
@@ -193,6 +186,7 @@ public class InputGUI extends JFrame {
         System.out.println("Arrival Time: " + arrivalTime);
         System.out.println("Burst Time: " + burstTime);
         System.out.println("Priority: " + priority);
+        System.out.println("Quantum Time: " + quantumTime);
 
         // Move to the next process or finish
         if (currentProcessIndex < totalProcesses) {
@@ -204,7 +198,7 @@ public class InputGUI extends JFrame {
                 System.out.println(p);
             }
             dispose(); // Close the application or redirect as needed
-            SwingUtilities.invokeLater(() -> new ChooseSchedularGUI(processList , contextSwitch , quantumTime));
+            SwingUtilities.invokeLater(() -> new ChooseSchedularGUI(processList , contextSwitch));
         }
     }
 

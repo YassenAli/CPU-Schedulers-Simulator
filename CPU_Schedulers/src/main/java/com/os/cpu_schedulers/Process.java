@@ -8,19 +8,21 @@ public class Process {
     private int arrivalTime;
     private int burstTime;
     private int priority;
+    private int quantumTime;
     private int remainingTime;
     private int startTime = -1;
     private int completionTime;
     private int waitingTime;
     private int turnaroundTime;
 
-    public Process(String name, Color color, int arrivalTime, int burstTime, int priority) {
+    public Process(String name, Color color, int arrivalTime, int burstTime, int priority , int quantumTime) {
         this.name = name;
         this.color = color;
         this.arrivalTime = arrivalTime;
         this.burstTime = burstTime;
         this.priority = priority;
         this.remainingTime = burstTime;
+        this.quantumTime = quantumTime;
     }
 
     public String getName() {
