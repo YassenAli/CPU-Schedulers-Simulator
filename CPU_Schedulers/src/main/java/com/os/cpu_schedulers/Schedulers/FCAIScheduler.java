@@ -25,7 +25,7 @@ public class FCAIScheduler implements Scheduler {
         this.quantumHistory = new HashMap<>();
         calculateV1AndV2();
 
-//        List<Process> completedProcesses = new ArrayList<>();
+        List<Process> completedProcesses = new ArrayList<>();
         int currentTime = 0;
 
         // Initialize processes with default quantum values and FCAI Factor
