@@ -12,8 +12,9 @@ public class PrioritySchedulerGUI extends JFrame {
     public PrioritySchedulerGUI(ArrayList<Process> processList , int contextSwitch) {
         this.processList = processList;
 
-        System.out.println("context switch is : "+contextSwitch);
-        System.out.println("number of process" + processList.size() );
+        for(int i =0 ; i<processList.size() ; i++) {
+            System.out.println(processList.get(i));
+        }
         // Frame configuration
         setSize(600, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
