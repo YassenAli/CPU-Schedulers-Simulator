@@ -7,10 +7,13 @@ import java.util.ArrayList;
 public class PrioritySchedulerGUI extends JFrame {
 
     private ArrayList<Process> processList;
+    private static int contextSwitch; // Context switch time in milliseconds
 
-    public PrioritySchedulerGUI(ArrayList<Process> processList) {
+    public PrioritySchedulerGUI(ArrayList<Process> processList , int contextSwitch) {
         this.processList = processList;
 
+        System.out.println("context switch is : "+contextSwitch);
+        System.out.println("number of process" + processList.size() );
         // Frame configuration
         setSize(600, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -33,6 +36,7 @@ public class PrioritySchedulerGUI extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new PrioritySchedulerGUI(new ArrayList<>()));
+
+        SwingUtilities.invokeLater(() -> new PrioritySchedulerGUI(new ArrayList<>() , contextSwitch));
     }
 }
