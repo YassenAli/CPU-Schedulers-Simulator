@@ -103,7 +103,7 @@ public class InputGUI extends JFrame {
 
     private void showProcessForm() {
         mainPanel.removeAll();
-
+        setSize(500 , 500);
         JLabel titleLabel = new JLabel("Enter Details for Process " + currentProcessIndex, SwingConstants.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         mainPanel.add(titleLabel);
