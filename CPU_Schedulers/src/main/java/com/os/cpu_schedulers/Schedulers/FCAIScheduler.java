@@ -10,6 +10,14 @@ public class FCAIScheduler implements Scheduler {
     private Map<String, List<Integer>> quantumHistory; // Stores quantum updates for each process
     private double averageWaitingTime;
     private double averageTurnaroundTime;
+    private Queue<Process> readyQueue;
+    private List<String> executionOrder;
+
+    public FCAIScheduler() {
+        readyQueue = new LinkedList<>();
+        executionOrder = new ArrayList<>();
+        quantumHistory = new HashMap<>();
+    }
 
     @Override
     public void schedule(List<Process> processes) {
@@ -17,15 +25,14 @@ public class FCAIScheduler implements Scheduler {
         this.quantumHistory = new HashMap<>();
         calculateV1AndV2();
 
-        Queue<Process> readyQueue = new LinkedList<>();
-        List<Process> completedProcesses = new ArrayList<>();
+//        List<Process> completedProcesses = new ArrayList<>();
         int currentTime = 0;
 
         // Initialize processes with default quantum values and FCAI Factor
         for (Process process : processes) {
-            process.setWaitingTime(0);
-            process.setTurnaroundTime(0);
-            quantumHistory.put(process.getName(), new ArrayList<>(List.of(2))); // Initial quantum value
+//            process.setWaitingTime(0);
+//            process.setTurnaroundTime(0);
+            quantumHistory.put(process.getName(), new ArrayList<>()); // Initial quantum value
         }
 
         while (!processes.isEmpty() || !readyQueue.isEmpty()) {
@@ -100,10 +107,18 @@ public class FCAIScheduler implements Scheduler {
     }
 
     private void calculateV1AndV2() {
-        int lastArrivalTime = processes.stream().mapToInt(Process::getArrivalTime).max().orElse(1);
-        int maxBurstTime = processes.stream().mapToInt(Process::getBurstTime).max().orElse(1);
-        this.v1 = lastArrivalTime / 10.0;
-        this.v2 = maxBurstTime / 10.0;
+        double lastArrivalTime = processes.stream()
+                .mapToInt(Process::getArrivalTime)
+                .max().orElse(1);
+        double maxBurstTime = processes.stream()
+                .mapToInt(Process::getBurstTime)
+                .max().orElse(1);
+
+        double V1 = Math.ceil(lastArrivalTime / 10.0);
+        double V2 = Math.ceil(maxBurstTime / 10.0);
+
+        this.v1 = V1;
+        this.v2 = V2;
     }
 
     private double calculateFCAIFactor(Process process) {
