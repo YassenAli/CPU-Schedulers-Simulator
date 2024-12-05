@@ -4,12 +4,21 @@ import com.os.cpu_schedulers.Schedulers.*;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.ArrayList;
+import java.awt.Color;
 
 public class CPU_Schedulers {
 
     public static void main(String[] args) {
         System.out.println("Welcome to the CPU Scheduler Simulator!");
-        List<Process> processes = InputHandler.getProcesses();
+        List<Process> processes = new ArrayList<>();;
+
+//        processes = InputHandler.getProcesses();
+
+        processes.add(new Process("P1", Color.RED, 0, 17, 4, 4));
+        processes.add(new Process("P2", Color.BLUE, 3, 6, 9, 3));
+        processes.add(new Process("P3", Color.GREEN, 4, 10, 3, 5));
+        processes.add(new Process("P4", Color.YELLOW, 29, 4, 8, 2));
 
         System.out.println("\nSelect a Scheduler:");
         System.out.println("1. Priority Scheduling");
