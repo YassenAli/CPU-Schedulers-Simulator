@@ -26,6 +26,7 @@ public class FCAIScheduler implements Scheduler {
         calculateV1AndV2();
 
         int curTime = 0;
+        boolean processCompleted = false;
         int totalProcesses = processes.size();
         Set<Process> completedProcesses = new HashSet<>();
         int processIndex = 0;
@@ -35,13 +36,14 @@ public class FCAIScheduler implements Scheduler {
 
         while (completedProcesses.size() < totalProcesses) {
             List<Process> newProcesses = new ArrayList<>();
-            for (Process process : processes) {
+            while (processIndex < totalProcesses) {
+                Process process = processes.get(processIndex);
                 if (process.getArrivalTime() > curTime) break;
                 process.calculateFCAIFactor(V1, V2);
                 newProcesses.add(process);
                 processIndex++;
             }
-            newProcesses.sort(Comparator.comparingInt((Process p) -> p.getArrivalTime()).thenComparingDouble(p -> p.getFCAIFactor()));
+            newProcesses.sort(Comparator.comparingInt(Process::getArrivalTime).thenComparingDouble(p -> p.getFCAIFactor()));
             readyQueue.addAll(newProcesses);
 
             if(readyQueue.isEmpty() && processIndex == processes.size()) {
@@ -68,18 +70,10 @@ public class FCAIScheduler implements Scheduler {
                     readyQueue.addFirst(curProcess);
                     execTime = 0;
                 }
-
             }
             if (execTime == 0) {
-                if (curProcess.getRemainingTime() == 0) {
-                    if (!completedProcesses.contains(curProcess)) {
-                        System.out.printf("Time %d: Context switching from Process %s to Process %s\n", curTime, curProcess.getName(), readyQueue.getFirst().getName());
-                        finalizeProcess(curProcess, curTime);
-                        completedProcesses.add(curProcess);
-                        newProcesses.remove(curProcess);
-                        processes.remove(curProcess);
-                    }
-
+                if (processCompleted) {
+                    System.out.printf("Time %d: Context switching from Process %s to Process %s\n", curTime, curProcess.getName(), readyQueue.getFirst().getName());
                 }
                 curProcess = readyQueue.getFirst();
                 System.out.printf("Time %d: Process %s with remaining time %d is executing\n", curTime, curProcess.getName(), curProcess.getRemainingTime());
@@ -88,7 +82,7 @@ public class FCAIScheduler implements Scheduler {
 //                curProcess.setQuantumTime(curProcess.getQuantumTime() - execTime);
                 curProcess.setRemainingTime(curProcess.getRemainingTime() - execTime);
                 curProcess.setHasExecuted40(true);
-                curProcess.setStartTime(curTime);
+//                curProcess.setStartTime(curTime);
                 curTime += execTime;
             } else if (execTime < curProcess.getQuantumTime()) {
                 execTime++;
@@ -105,15 +99,17 @@ public class FCAIScheduler implements Scheduler {
             }
 
             if (curProcess.getRemainingTime() == 0) {
+                System.out.printf("Time %d: Process %s has completed execution\n", curTime, curProcess.getName());
+                processCompleted = true;
                 readyQueue.removeFirst();
+//                newProcesses.remove(curProcess);
+//                processes.remove(curProcess);
+                finalizeProcess(curProcess, curTime);
+                completedProcesses.add(curProcess);
                 execTime = 0;
-                if (!completedProcesses.contains(curProcess)) {
-                    System.out.printf("Time %d: Process %s has completed execution\n", curTime, curProcess.getName());
-                    finalizeProcess(curProcess, curTime);
-                    completedProcesses.add(curProcess);
-                    newProcesses.remove(curProcess);
-                    processes.remove(curProcess);
-                }
+//                if (!completedProcesses.contains(curProcess)) {
+//
+//                }
 
             }
         }
