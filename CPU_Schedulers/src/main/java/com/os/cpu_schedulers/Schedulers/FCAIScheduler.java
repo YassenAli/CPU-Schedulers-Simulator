@@ -11,87 +11,110 @@ public class FCAIScheduler implements Scheduler {
     private Map<String, List<Integer>> quantumHistory; // Stores quantum updates for each process
     private double averageWaitingTime;
     private double averageTurnaroundTime;
-    private PriorityQueue<Process> readyQueue;
+    private List<Process> readyQueue;
     private List<String> executionOrder;
-    private Map<String, Double> fcaiFactors;
-    private Map<String, Boolean> hasExecuted40Percent;
-    private Map<Process, Map<String, Object>> processDetails;
 
     public FCAIScheduler() {
-        readyQueue = new PriorityQueue<>(Comparator.comparingDouble(p -> p.calculateFCAIFactor(V1, V2)));
+        readyQueue = new ArrayList<>();
         executionOrder = new ArrayList<>();
         quantumHistory = new HashMap<>();
     }
 
     @Override
-    public void schedule(List<Process> processes) {
-        initializeProcesses(processes);
+    public void schedule(List<Process> givenProcesses) {
+        initializeProcesses(givenProcesses);
         calculateV1AndV2();
-        CalculateFCAIFactorForEachProcess();
 
         int curTime = 0;
         int totalProcesses = processes.size();
-        int completedProcess = 0;
+        Set<Process> completedProcesses = new HashSet<>();
+        int processIndex = 0;
+        int execTime = 0;
+        Process curProcess = processes.getFirst();
 
-        while (completedProcess < totalProcesses){
-            for (Process process : processes){
-                if (process.getArrivalTime() <= curTime && process.getRemainingTime() > 0 && !readyQueue.contains(process)){
-                    readyQueue.add(process);
-                }
+
+        while (completedProcesses.size() < totalProcesses) {
+            List<Process> newProcesses = new ArrayList<>();
+            for (Process process : processes) {
+                if (process.getArrivalTime() > curTime) break;
+                process.calculateFCAIFactor(V1, V2);
+                newProcesses.add(process);
+                processIndex++;
             }
-            if(readyQueue.isEmpty()){
+            newProcesses.sort(Comparator.comparingInt((Process p) -> p.getArrivalTime()).thenComparingDouble(p -> p.getFCAIFactor()));
+            readyQueue.addAll(newProcesses);
+
+            if(readyQueue.isEmpty() && processIndex == processes.size()) {
+                break;
+            } else if (readyQueue.isEmpty()) {
                 System.out.printf("Idle from time %d to %d\n", curTime, curTime + 1);
-                curTime++; continue;
+                curTime++;
+                continue;
             }
-            Process curProcess = readyQueue.poll();
-            int execTime = 0;
-            if(!curProcess.isHasExecuted40()){
-                curProcess.setStartTime(curTime);
+
+            if (execTime != 0) {
+                Process first = readyQueue.getFirst();
+                curProcess = readyQueue.stream()
+                        .min(Comparator.comparingDouble(Process::getFCAIFactor))
+                        .orElse(null);
+                if (curProcess != first) {
+                    curProcess.calculateFCAIFactor(V1, V2);
+                    int unusedTime = first.getQuantumTime() - execTime;
+                    first.setQuantumTime(first.getQuantumTime() + unusedTime);
+                    System.out.printf("Time %d: Context switching from Process %s to Process %s\n", curTime, first.getName(), curProcess.getName());
+                    readyQueue.removeFirst();
+                    readyQueue.remove(curProcess);
+                    readyQueue.add(first);
+                    readyQueue.addFirst(curProcess);
+                    execTime = 0;
+                }
+
+            }
+            if (execTime == 0) {
+                if (curProcess.getRemainingTime() == 0) {
+                    if (!completedProcesses.contains(curProcess)) {
+                        System.out.printf("Time %d: Context switching from Process %s to Process %s\n", curTime, curProcess.getName(), readyQueue.getFirst().getName());
+                        finalizeProcess(curProcess, curTime);
+                        completedProcesses.add(curProcess);
+                        newProcesses.remove(curProcess);
+                        processes.remove(curProcess);
+                    }
+
+                }
+                curProcess = readyQueue.getFirst();
+                System.out.printf("Time %d: Process %s with remaining time %d is executing\n", curTime, curProcess.getName(), curProcess.getRemainingTime());
                 execTime = (int) Math.ceil(0.4 * curProcess.getQuantumTime());
                 execTime = Math.min(execTime, curProcess.getRemainingTime());
-                curProcess.setQuantumTime(curProcess.getQuantumTime() - execTime);
+//                curProcess.setQuantumTime(curProcess.getQuantumTime() - execTime);
                 curProcess.setRemainingTime(curProcess.getRemainingTime() - execTime);
                 curProcess.setHasExecuted40(true);
+                curProcess.setStartTime(curTime);
                 curTime += execTime;
-                executionOrder.add(curProcess.getName());
+            } else if (execTime < curProcess.getQuantumTime()) {
+                execTime++;
+                curTime++;
+                curProcess.setRemainingTime(curProcess.getRemainingTime() - 1);
+//                curProcess.setQuantumTime(curProcess.getQuantumTime()-1);
+            } else {
+                curProcess.calculateFCAIFactor(V1, V2);
+                curProcess.setQuantumTime(curProcess.getQuantumTime() + 2);
+                readyQueue.add(readyQueue.getFirst());
+                readyQueue.removeFirst();
+                System.out.printf("Time %d: Context switching from Process %s to Process %s\n", curTime, curProcess.getName(), readyQueue.getFirst().getName());
+                execTime = 0;
             }
-            while (curProcess.getRemainingTime() > 0){
-                boolean preempted = false;
-                curTime++; execTime++;
-                curProcess.setQuantumTime(curProcess.getQuantumTime() - 1);
-                curProcess.setRemainingTime(curProcess.getRemainingTime() - 1);
 
-                for (Process process : processes){
-                    if (process.getArrivalTime() <= curTime && process.calculateFCAIFactor(V1, V2) < curProcess.getFCAIFactor() && process.getRemainingTime() > 0 && !readyQueue.contains(process)){
-                        readyQueue.add(process);
-                        System.out.printf("%s is interrupted due to %s having a lower FCAI factor.%n", curProcess.getName(), process.getName());
-                        preempted = true;
-                        updateQuantum(process, execTime);
-                        executionOrder.add(curProcess.getName());
-                        curProcess.calculateFCAIFactor(V1, V2);
-                        break;
-                    }
-                }
-                if(preempted) break;
-
-                execTime++; curTime++;
-                curProcess.setQuantumTime(curProcess.getQuantumTime() - 1);
-                curProcess.setRemainingTime(curProcess.getRemainingTime() - 1);
-                executionOrder.add(curProcess.getName());
-                if(curProcess.getRemainingTime() <= 0){
+            if (curProcess.getRemainingTime() == 0) {
+                readyQueue.removeFirst();
+                execTime = 0;
+                if (!completedProcesses.contains(curProcess)) {
+                    System.out.printf("Time %d: Process %s has completed execution\n", curTime, curProcess.getName());
                     finalizeProcess(curProcess, curTime);
-                    completedProcess++;
+                    completedProcesses.add(curProcess);
+                    newProcesses.remove(curProcess);
+                    processes.remove(curProcess);
                 }
-                if(curProcess.getQuantumTime() <= 0){
-                    updateQuantum(curProcess, execTime);
-                }
-            }
-            if(curProcess.getRemainingTime() <= 0){
-                completedProcess++;
-                finalizeProcess(curProcess, curTime);
-            }
-            if(curProcess.getQuantumTime() <= 0){
-                updateQuantum(curProcess, execTime);
+
             }
         }
     }
@@ -100,13 +123,7 @@ public class FCAIScheduler implements Scheduler {
         this.processes.sort(Comparator.comparingInt(Process::getArrivalTime));
         for (Process process : this.processes) {
             process.setHasExecuted40(false);
-            process.calculateFCAIFactor(V1, V2);
             quantumHistory.put(process.getName(), new ArrayList<>(List.of(process.getQuantumTime())));
-        }
-    }
-    private void CalculateFCAIFactorForEachProcess(){
-        for (Process process : this.processes) {
-            process.calculateFCAIFactor(V1, V2);
         }
     }
     private void calculateV1AndV2() {
@@ -117,47 +134,6 @@ public class FCAIScheduler implements Scheduler {
         this.V1 = lastArrivalTime / 10.0;
         this.V2 = maxBurstTime / 10.0;
         System.out.println("V1 and V2: "+V1+" "+V2);
-    }
-
-    private void updateFCAIFactor(Process process) {
-        double fcaiFactor = (10 - process.getPriority())
-                + Math.ceil(process.getArrivalTime() / V1)
-                + Math.ceil(process.getRemainingTime() / V2);
-        processDetails.get(process).put("FCAI Factor", fcaiFactor);
-        fcaiFactors.put(process.getName(), fcaiFactor);
-        System.out.println("FCAI Factor & process Name: "+process.getName()+" "+fcaiFactor);
-        System.out.println("process remaining time: "+process.getRemainingTime());
-        System.out.println("\n");
-    }
-    private void calculateAndStoreFCAIFactor(Process process) {
-        double fcaiFactor = (10 - process.getPriority())
-                + Math.ceil(process.getArrivalTime() / V1)
-                + Math.ceil(process.getRemainingTime() / V2);
-        fcaiFactors.put(process.getName(), fcaiFactor);
-        System.out.println("FCAI Factor & process Name: "+process.getName()+" "+fcaiFactor);
-        System.out.println("process remaining time: "+process.getRemainingTime());
-        System.out.println("\n");
-    }
-    private void updateQuantum(Process process) {
-        int executionTime = (int) processDetails.get(process).get("Execution Time");
-        if (executionTime == process.getQuantumTime() && process.getRemainingTime()>0) {
-            process.setQuantumTime(process.getQuantumTime() + 2);
-        } else {
-            int unusedTime = process.getQuantumTime() - executionTime;
-            process.setQuantumTime(process.getQuantumTime() + unusedTime);
-        }
-    }
-    private Process selectBestProcess() {
-        for (Process process : readyQueue) {
-            // Update FCAI Factor for each process in the ready queue
-            calculateAndStoreFCAIFactor(process);
-        }
-        // Find the process with the minimum FCAI Factor
-        System.out.println("minimum FCAI Factor: "+readyQueue.stream()
-                .min(Comparator.comparingDouble(p -> fcaiFactors.get(p.getName()))));
-        return readyQueue.stream()
-                .min(Comparator.comparingDouble(p -> fcaiFactors.get(p.getName())))
-                .orElseThrow();
     }
     private double getLastArrivalTime() {
         return processes.stream()
@@ -171,22 +147,6 @@ public class FCAIScheduler implements Scheduler {
                 .max()
                 .orElse(1);
     }
-
-    private void updateQuantum(Process process,int executionTime) {
-        int newQuantum;
-
-        // completed
-        if (executionTime == process.getQuantumTime()) {
-            newQuantum = process.getQuantumTime() + 2;
-        } else {
-            // if process is preempted
-            int unusedTime = process.getQuantumTime() - executionTime;
-            newQuantum = process.getQuantumTime() + unusedTime;
-        }
-        process.setQuantumTime(newQuantum);
-        System.out.println("new quantum of process: "+process.getName()+" "+process.getQuantumTime());
-        quantumHistory.get(process.getName()).add(newQuantum);
-    }
     private void finalizeProcess(Process process, int currentTime) {
         process.setCompletionTime(currentTime);
         process.setTurnaroundTime(currentTime - process.getArrivalTime());
@@ -195,6 +155,7 @@ public class FCAIScheduler implements Scheduler {
     }
 
     private void finalizeProcess(Process process, List<Process> completedProcesses, int currentTime) {
+        process.setCompletionTime(currentTime);
         process.setTurnaroundTime(currentTime - process.getArrivalTime());
         process.setWaitingTime(process.getTurnaroundTime() - process.getBurstTime());
         completedProcesses.add(process);
