@@ -15,7 +15,7 @@ public class Process {
     private int waitingTime;
     private int turnaroundTime;
 
-    public Process(String name, Color color, int arrivalTime, int burstTime, int priority , int quantumTime) {
+    public Process(String name, Color color, int arrivalTime, int burstTime, int priority , int quantumTime , int waitingTime) {
         this.name = name;
         this.color = color;
         this.arrivalTime = arrivalTime;
@@ -23,6 +23,9 @@ public class Process {
         this.priority = priority;
         this.remainingTime = burstTime;
         this.quantumTime = quantumTime;
+    }
+
+    public Process(String name, String color, int arrivalTime, int burstTime, int priority) {
     }
 
     public String getName() {
@@ -71,6 +74,18 @@ public class Process {
 
     public int getWaitingTime() {
         return waitingTime;
+    }
+
+    public void incrementWaitCount() {
+        waitingTime++;
+    }
+
+    public void increasePriority() {
+        priority--;
+    }
+
+    public void resetWaitCount() {
+        waitingTime = 0;
     }
 
     public void setWaitingTime(int waitingTime) {
