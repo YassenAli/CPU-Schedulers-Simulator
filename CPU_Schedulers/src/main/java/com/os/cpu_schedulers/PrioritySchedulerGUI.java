@@ -2,150 +2,169 @@ package com.os.cpu_schedulers;
 
 import javax.swing.*;
 import java.awt.*;
-import java.math.BigInteger;
 import java.util.*;
 
 public class PrioritySchedulerGUI extends JFrame {
-
     private ArrayList<Process> processList;
     private static int contextSwitch;
     private Set<Process> processedSet;
 
-    public PrioritySchedulerGUI(ArrayList<Process> processList , int contextSwitch) {
+    public PrioritySchedulerGUI(ArrayList<Process> processList, int contextSwitch) {
         this.processList = processList;
         processedSet = new HashSet<>();
 
         // Frame configuration
-        setSize(600, 600);
+        setTitle("Priority Scheduler with Gantt Chart");
+        setSize(900, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
         setLocationRelativeTo(null);
 
-        // Panel configuration
-        JPanel panel = new JPanel();
-        panel.setBackground(new Color(255, 255, 255));
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS)); // kol element hydaf hyt7to vertical
-        add(panel, BorderLayout.CENTER);
-
-        // Label configuration
-        JLabel label = new JLabel("Priority Scheduler");
-        label.setAlignmentX(Component.CENTER_ALIGNMENT);
-        label.setFont(new Font("Arial", Font.BOLD, 16));
-        panel.add(label);
-
-        setVisible(true);
-
         Collections.sort(processList, Comparator.comparingInt(Process::getArrivalTime));
+
         PriorityQueue<Process> waitingProcesses = new PriorityQueue<>(Comparator.comparingInt(Process::getPriority));
-        int currentTime = 0 ;
+        int currentTime = 0;
         int avgWaitingTime = 0;
-        int avgTurnAroundTime = 0;
+        int avgTurnaroundTime = 0;
+
+        // To store Gantt chart segments
+        ArrayList<GanttSegment> ganttChart = new ArrayList<>();
 
         for (int i = 0; i < processList.size() || !waitingProcesses.isEmpty(); ) {
-            // Add processes to the waiting queue that have arrived and are not yet processed
             while (i < processList.size() && processList.get(i).getArrivalTime() <= currentTime) {
                 Process process = processList.get(i);
                 if (!processedSet.contains(process)) {
                     waitingProcesses.add(process);
                     processedSet.add(process);
-                    System.out.println("!!!! Process: " + process.getName() + " added to the waiting list");
                 }
                 i++;
             }
 
-            // each waiting process has its own waiting time when this time == 5
-            // increase the last process waiting priority by one and then make its waiting time = 0
-            // put all waiting processes in temporary array
-            // and check the waiting time for each and apply the aging then add all the processes in the actual waiting list
-
-            ArrayList<Process> tempQueue = new ArrayList<>();
-
-            while (!waitingProcesses.isEmpty()) {
-                Process process = waitingProcesses.poll();
-                process.incrementWaitCount();
-                tempQueue.add(process);
-            }
-
-
-            if (!tempQueue.isEmpty()) {
-                Process lastProcess = tempQueue.get(tempQueue.size() - 1);
-                if (lastProcess.getWaitingTime() >= 5) {
-                    lastProcess.increasePriority();
-                    lastProcess.resetWaitCount();
-                    System.out.println("Aging applied: Process " + lastProcess.getName() + " priority increased to " + lastProcess.getPriority());
-                }
-            }
-
-            waitingProcesses.addAll(tempQueue);
-
-
-
-            if (!waitingProcesses.isEmpty()) { // execute
-
+            if (!waitingProcesses.isEmpty()) {
                 Process nextProcess = waitingProcesses.poll();
-                currentTime += nextProcess.getBurstTime();
-                System.out.println("Process: " + nextProcess.getName() + " executed from the waiting list");
-                int waitingTime = currentTime - nextProcess.getArrivalTime() - nextProcess.getBurstTime();
-                System.out.println("Waiting time is " + waitingTime);
-                int turnAorundTime = currentTime-nextProcess.getArrivalTime();
-                System.err.println("TurnAroundTime = " + turnAorundTime);
+
+                // Calculate start time and waiting time
+                int startTime = Math.max(currentTime, nextProcess.getArrivalTime());
+                int waitingTime = startTime - nextProcess.getArrivalTime();
+                int turnaroundTime = waitingTime + nextProcess.getBurstTime();
 
                 avgWaitingTime += waitingTime;
-                avgTurnAroundTime += turnAorundTime;
+                avgTurnaroundTime += turnaroundTime;
 
-                // add the context switch if it is not the last process
+                // Add Gantt chart segment
+                ganttChart.add(new GanttSegment(nextProcess.getName(), startTime, startTime + nextProcess.getBurstTime(), nextProcess.getColor()));
+
+                // Update currentTime after execution
+                currentTime = startTime + nextProcess.getBurstTime();
+
+                // Add context switch if more processes remain
                 if (!waitingProcesses.isEmpty() || i < processList.size()) {
+                    ganttChart.add(new GanttSegment("CS", currentTime, currentTime + contextSwitch, Color.LIGHT_GRAY));
                     currentTime += contextSwitch;
                 }
+
+                // Store waiting and turnaround times in the process object
+                nextProcess.setWaitingTime(waitingTime);
+                nextProcess.setTurnaroundTime(turnaroundTime);
             } else if (i < processList.size()) {
-                // in the idle case if the cpu has no process to do , current time = the next arrival time
+                // Handle idle time
                 int idleTime = processList.get(i).getArrivalTime() - currentTime;
-                System.out.println("CPU is idle for " + idleTime + " time units");
-                currentTime =  processList.get(i).getArrivalTime();
+                ganttChart.add(new GanttSegment("Idle", currentTime, currentTime + idleTime, Color.LIGHT_GRAY));
+                currentTime = processList.get(i).getArrivalTime();
             }
         }
 
-        System.err.println("the current time is " + currentTime);
-        System.err.println("Average Waiting Time = " + avgWaitingTime / processList.size());
-        System.err.println("Average Turnaround Time = " + avgTurnAroundTime / processList.size());
+// Average times
+        avgWaitingTime /= processList.size();
+        avgTurnaroundTime /= processList.size();
 
+
+        // GUI components
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BorderLayout());
+
+        // Gantt chart panel
+        JPanel ganttPanel = new GanttChartPanel(ganttChart);
+        ganttPanel.setPreferredSize(new Dimension(800, 200));
+        mainPanel.add(ganttPanel, BorderLayout.CENTER);
+
+        // Metrics table
+        String[] columnNames = {"Process", "Waiting Time", "Turnaround Time"};
+        String[][] data = new String[processList.size()][3];
+        int index = 0;
+
+        for (Process process : processList) {
+
+            data[index][0] = process.getName();
+            data[index][1] = String.valueOf(process.getWaitingTime());
+            data[index][2] = String.valueOf(process.getTurnaroundTime());
+            index++;
+        }
+
+        JTable table = new JTable(data, columnNames);
+        JScrollPane scrollPane = new JScrollPane(table);
+        mainPanel.add(scrollPane, BorderLayout.SOUTH);
+
+        add(mainPanel);
+        setVisible(true);
+
+        // Display averages
+        JOptionPane.showMessageDialog(this, "Average Waiting Time: " + avgWaitingTime +
+                "\nAverage Turnaround Time: " + avgTurnaroundTime, "Averages", JOptionPane.INFORMATION_MESSAGE);
     }
 
     public static void main(String[] args) {
+        // Example process list
+//        ArrayList<Process> processes = new ArrayList<>();
+//        processes.add(new Process("P1", Color.RED, 0, 8, 3));
+//        processes.add(new Process("P2", Color.BLUE, 2, 5, 1));
+//        processes.add(new Process("P3", Color.GREEN, 4, 2, 2));
+//
+//        int contextSwitchTime = 2;
 
         SwingUtilities.invokeLater(() -> new PrioritySchedulerGUI(new ArrayList<>() , contextSwitch));
     }
+
+    // Inner class to represent Gantt chart segments
+    static class GanttSegment {
+        String label;
+        int startTime;
+        int endTime;
+        Color color;
+
+        public GanttSegment(String label, int startTime, int endTime, Color color) {
+            this.label = label;
+            this.startTime = startTime;
+            this.endTime = endTime;
+            this.color = color;
+        }
+    }
+
+    // Panel to draw the Gantt chart
+    static class GanttChartPanel extends JPanel {
+        private final ArrayList<GanttSegment> segments;
+
+        public GanttChartPanel(ArrayList<GanttSegment> segments) {
+            this.segments = segments;
+            setBackground(Color.WHITE);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            int x = 50, y = 50, height = 50;
+
+            for (GanttSegment segment : segments) {
+                int width = (segment.endTime - segment.startTime) * 20; // Scale each unit time to 20 pixels
+                g.setColor(segment.color);
+                g.fillRect(x, y, width, height);
+                g.setColor(Color.BLACK);
+                g.drawRect(x, y, width, height);
+                g.drawString(segment.label, x + width / 2 - 10, y + height / 2);
+                g.drawString(String.valueOf(segment.startTime), x - 5, y + height + 15);
+                x += width;
+            }
+            g.drawString(String.valueOf(segments.get(segments.size() - 1).endTime), x - 5, y + height + 15);
+        }
+    }
 }
-
-
-
-// todo ===================================================================
-// sort processes by arrival time                                       (done)
-// variable current time                                                (done)
-// make the current time = curent time + burst time                     (done)
-// current tiem = current time + context switch                         (done)
-// note that the last process doesn't have a
-// context switch because     (done)
-// check the process that arrived
-// if there a process arrived then take the highest priority
-// note that
-// gui step
-
-
-
-/*
-
-
-Check if waitingProcesses is not empty:
-Execute the process with the highest priority (using poll()).
-Update currentTime and add contextSwitch.
-If waitingProcesses is empty:
-Check the next process from processList.
-Update currentTime based on its arrivalTime (handle idle time).
-Continuously check for new arrivals and add them to waitingProcesses.
-Handle Final Process:
-
-Ensure no contextSwitch is added after the last process.
-
-        */
-
