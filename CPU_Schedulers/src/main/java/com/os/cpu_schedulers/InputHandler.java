@@ -1,7 +1,9 @@
 package com.os.cpu_schedulers;
 
 import javax.swing.*;
+import java.awt.Color;
 import java.util.*;
+
 public class InputHandler extends JFrame {
     public static List<Process> getProcesses() {
         Scanner scanner = new Scanner(System.in);
@@ -16,8 +18,9 @@ public class InputHandler extends JFrame {
             System.out.print("Name: ");
             String name = scanner.next();
 
-            System.out.print("Color: ");
-            String color = scanner.next();
+            System.out.print("Color (in hexadecimal, e.g., #FF5733): ");
+            String colorHex = scanner.next();
+            Color color = Color.decode(colorHex); // Convert hex to Color object
 
             System.out.print("Arrival Time: ");
             int arrivalTime = scanner.nextInt();
@@ -25,11 +28,12 @@ public class InputHandler extends JFrame {
             System.out.print("Burst Time: ");
             int burstTime = scanner.nextInt();
 
-            System.out.print("Priority (lower value = higher priority): ");
+            System.out.print("Priority (optional, enter 0 if not used): ");
             int priority = scanner.nextInt();
 
-//            Process process = new Process(name, color, arrivalTime, burstTime, priority);
-//            processes.add(process);
+            // Create and add the process
+            Process process = new Process(name, color, arrivalTime, burstTime, priority, 0, 0);
+            processes.add(process);
         }
 
         System.out.println("\nProcesses have been initialized successfully.\n");

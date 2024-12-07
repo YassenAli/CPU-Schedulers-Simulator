@@ -15,14 +15,14 @@ public class Process {
     private int waitingTime;
     private int turnaroundTime;
 
-    public Process(String name, Color color, int arrivalTime, int burstTime, int priority , int quantumTime , int waitingTime) {
+    public Process(String name, Color color, int arrivalTime, int burstTime, int priority, int quantumTime, int waitingTime) {
         this.name = name;
         this.color = color;
         this.arrivalTime = arrivalTime;
         this.burstTime = burstTime;
         this.priority = priority;
-        this.remainingTime = burstTime;
         this.quantumTime = quantumTime;
+        this.remainingTime = burstTime; // Remaining time initially equals burst time
     }
 
     public Process(String name, String color, int arrivalTime, int burstTime, int priority) {
