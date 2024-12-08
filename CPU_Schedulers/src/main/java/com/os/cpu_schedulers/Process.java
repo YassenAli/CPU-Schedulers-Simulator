@@ -90,7 +90,7 @@ public class Process {
     }
 
     public double calculateFCAIFactor(double V1, double V2) {
-        this.FCAIFactor = (10 - this.priority) + (this.arrivalTime / V1) + (this.remainingTime / V2);
+        this.FCAIFactor = (10 - this.priority) + Math.ceil(this.arrivalTime / V1) + Math.ceil(this.remainingTime / V2);
         return FCAIFactor;
     }
 
