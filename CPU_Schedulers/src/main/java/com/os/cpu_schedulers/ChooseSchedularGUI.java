@@ -1,6 +1,7 @@
 package com.os.cpu_schedulers;
 import  com.os.cpu_schedulers.SJFSchedulerGUI;
 import com.os.cpu_schedulers.InputGUI;
+import com.os.cpu_schedulers.Schedulers.FCAISchedulerGUI;
 import com.os.cpu_schedulers.Schedulers.SRTFSchedulerGUI;
 
 import javax.swing.*;
@@ -107,6 +108,11 @@ public class ChooseSchedularGUI extends JFrame {
         FCAISchedulerButton.setFocusPainted(false);
 
         mainPanel.add(FCAISchedulerButton);
+
+        FCAISchedulerButton.addActionListener(e -> {
+            FCAISchedulerGUI fcaiSchedulerGUI = new FCAISchedulerGUI(processList);
+            this.dispose();
+        });
 
         setVisible(true);
     }
