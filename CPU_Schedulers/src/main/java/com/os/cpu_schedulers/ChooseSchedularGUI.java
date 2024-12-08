@@ -1,6 +1,7 @@
 package com.os.cpu_schedulers;
 import  com.os.cpu_schedulers.SJFSchedulerGUI;
 import com.os.cpu_schedulers.InputGUI;
+import com.os.cpu_schedulers.Schedulers.SRTFSchedulerGUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -87,6 +88,11 @@ public class ChooseSchedularGUI extends JFrame {
         // Add the second button to the panel
         mainPanel.add(SRTFSchedulerButton);
 
+        // open srtf form when click on the button
+        SRTFSchedulerButton.addActionListener(e -> {
+            SRTFSchedulerGUI srtfSchedulerGUI = new SRTFSchedulerGUI(processList);
+            this.dispose();
+        });
 
         // Add vertical spacing (30 pixels between buttons)
         mainPanel.add(Box.createVerticalStrut(30));

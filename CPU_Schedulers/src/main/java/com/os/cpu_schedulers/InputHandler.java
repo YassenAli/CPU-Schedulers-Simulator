@@ -1,9 +1,11 @@
 package com.os.cpu_schedulers;
 
-import javax.swing.*;
-import java.awt.*;
-import java.util.*;
+import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+
+import javax.swing.JFrame;
 
 public class InputHandler extends JFrame {
     public static List<Process> getProcesses() {
@@ -19,8 +21,9 @@ public class InputHandler extends JFrame {
             System.out.print("Name: ");
             String name = scanner.next();
 
-            System.out.print("Color: ");
-//            Color color = Color.decode(scanner.next());
+            System.out.print("Color (in hexadecimal, e.g., #FF5733): ");
+            String colorHex = scanner.next();
+            Color color = Color.decode(colorHex); // Convert hex to Color object
 
             System.out.print("Arrival Time: ");
             int arrivalTime = scanner.nextInt();
@@ -28,13 +31,14 @@ public class InputHandler extends JFrame {
             System.out.print("Burst Time: ");
             int burstTime = scanner.nextInt();
 
-            System.out.print("Priority (lower value = higher priority): ");
+            System.out.print("Priority (optional, enter 0 if not used): ");
             int priority = scanner.nextInt();
 
             System.out.print("Quantum Time: ");
             int quantum = scanner.nextInt();
 
-            Process process = new Process(name, Color.red, arrivalTime, burstTime, priority, quantum);
+            // Create and add the process
+            Process process = new Process(name, color, arrivalTime, burstTime, priority, quantum, 0);
             processes.add(process);
         }
 

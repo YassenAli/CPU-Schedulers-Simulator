@@ -177,7 +177,7 @@ public class InputGUI extends JFrame {
         int quantumTime = Integer.parseInt(quantumTimeField.getText().trim());
 
         // Create a new Process object and add it to the list
-        Process process = new Process(processName, selectedColor, arrivalTime, burstTime, priority , quantumTime);
+        Process process = new Process(processName, selectedColor, arrivalTime, burstTime, priority , quantumTime , 0);
         processList.add(process);
 
         System.out.println("Process " + currentProcessIndex + ":");
