@@ -1,6 +1,13 @@
 package com.os.cpu_schedulers.Schedulers;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.os.cpu_schedulers.Process;
 
 public class FCAIScheduler implements Scheduler {
@@ -36,12 +43,14 @@ public class FCAIScheduler implements Scheduler {
             List<Process> newProcesses = new ArrayList<>();
             while (processIndex < totalProcesses) {
                 Process process = processes.get(processIndex);
-                if (process.getArrivalTime() > curTime) break;
+                if (process.getArrivalTime() > curTime)
+                    break;
                 process.calculateFCAIFactor(V1, V2);
                 newProcesses.add(process);
                 processIndex++;
             }
-            newProcesses.sort(Comparator.comparingInt(Process::getArrivalTime).thenComparingDouble(Process::getFCAIFactor));
+            newProcesses
+                    .sort(Comparator.comparingInt(Process::getArrivalTime).thenComparingDouble(Process::getFCAIFactor));
             readyQueue.addAll(newProcesses);
 
             if (readyQueue.isEmpty() && processIndex == processes.size()) {
@@ -55,7 +64,7 @@ public class FCAIScheduler implements Scheduler {
                 continue;
             }
 
-            if(execTime > 0) {
+            if (execTime > 0) {
                 // Select the process with the lowest FCAI factor
                 Process first = readyQueue.getFirst();
                 curProcess = readyQueue.stream()
@@ -67,7 +76,8 @@ public class FCAIScheduler implements Scheduler {
                     int unusedTime = first.getQuantumTime() - execTime;
                     first.setQuantumTime(first.getQuantumTime() + unusedTime);
                     quantumHistory.get(first.getName()).add(first.getQuantumTime());
-                    System.out.printf("Time %d: Context switching: %s preempts %s, runs for %d units, remaining burst = %d.\n",
+                    System.out.printf(
+                            "Time %d: Context switching: %s preempts %s, runs for %d units, remaining burst = %d.\n",
                             curTime, curProcess.getName(), first.getName(), execTime, curProcess.getRemainingTime());
                     curTime += contextSwitchTime;
                     readyQueue.removeFirst();
@@ -96,9 +106,11 @@ public class FCAIScheduler implements Scheduler {
                 curProcess.setQuantumTime(curProcess.getQuantumTime() + 2);
                 quantumHistory.get(curProcess.getName()).add(curProcess.getQuantumTime());
                 readyQueue.addLast(readyQueue.removeFirst());
-                if(curProcess != readyQueue.getFirst()) {
-                    System.out.printf("Time %d: Context switching: %s preempts %s, runs for %d units, remaining burst = %d.\n",
-                            curTime, readyQueue.getFirst().getName(), curProcess.getName(), execTime, curProcess.getRemainingTime());
+                if (curProcess != readyQueue.getFirst()) {
+                    System.out.printf(
+                            "Time %d: Context switching: %s preempts %s, runs for %d units, remaining burst = %d.\n",
+                            curTime, readyQueue.getFirst().getName(), curProcess.getName(), execTime,
+                            curProcess.getRemainingTime());
                     curTime += contextSwitchTime;
                     execTime = 0;
                 }
@@ -115,6 +127,7 @@ public class FCAIScheduler implements Scheduler {
         }
         calculateAndPrintResults(completedProcesses);
     }
+
     private void initializeProcesses(List<Process> processes) {
         this.processes = new ArrayList<>(processes);
         this.processes.sort(Comparator.comparingInt(Process::getArrivalTime));
@@ -123,6 +136,7 @@ public class FCAIScheduler implements Scheduler {
             quantumHistory.put(process.getName(), new ArrayList<>(List.of(process.getQuantumTime())));
         }
     }
+
     private void calculateV1AndV2() {
         double lastArrivalTime = getLastArrivalTime();
         double maxBurstTime = getMaxBurstTime();
@@ -130,20 +144,23 @@ public class FCAIScheduler implements Scheduler {
         // not Math.ceil
         this.V1 = lastArrivalTime / 10.0;
         this.V2 = maxBurstTime / 10.0;
-        System.out.println("V1 and V2: "+V1+" "+V2);
+        System.out.println("V1 and V2: " + V1 + " " + V2);
     }
+
     private double getLastArrivalTime() {
         return processes.stream()
                 .mapToInt(Process::getArrivalTime)
                 .max()
                 .orElse(1);
     }
+
     private double getMaxBurstTime() {
         return processes.stream()
                 .mapToInt(Process::getBurstTime)
                 .max()
                 .orElse(1);
     }
+
     private void finalizeProcess(Process process, int currentTime) {
         process.setCompletionTime(currentTime);
         process.setTurnaroundTime(currentTime - process.getArrivalTime());
@@ -163,6 +180,7 @@ public class FCAIScheduler implements Scheduler {
         averageWaitingTime = (double) totalWaitingTime / completedProcesses.size();
         averageTurnaroundTime = (double) totalTurnaroundTime / completedProcesses.size();
 
+        // printResults();
         System.out.println("\nProcess Details:");
         for (Process process : completedProcesses) {
             System.out.printf("Process %s - Waiting Time: %d, Turnaround Time: %d%n",
@@ -171,8 +189,8 @@ public class FCAIScheduler implements Scheduler {
 
         System.out.printf("\nAverage Waiting Time: %.2f\n", averageWaitingTime);
         System.out.printf("Average Turnaround Time: %.2f\n", averageTurnaroundTime);
-
     }
+
     @Override
     public void printResults() {
         System.out.println("\nExecution Order: " + String.join(" -> ", executionOrder));
