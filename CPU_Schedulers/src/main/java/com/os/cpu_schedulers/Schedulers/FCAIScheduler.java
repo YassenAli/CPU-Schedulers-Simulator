@@ -210,4 +210,10 @@ public class FCAIScheduler implements Scheduler {
             System.out.printf("Process %s: %s%n", entry.getKey(), entry.getValue());
         }
     }
+    private List<Integer> executionTimes = new ArrayList<>();
+
+    public List<Integer> getExecutionTimes() {
+        return executionTimes;
+    }
+
 }
