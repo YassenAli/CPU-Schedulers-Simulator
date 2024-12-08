@@ -163,7 +163,6 @@ public class FCAIScheduler implements Scheduler {
         averageWaitingTime = (double) totalWaitingTime / completedProcesses.size();
         averageTurnaroundTime = (double) totalTurnaroundTime / completedProcesses.size();
 
-//        printResults();
         System.out.println("\nProcess Details:");
         for (Process process : completedProcesses) {
             System.out.printf("Process %s - Waiting Time: %d, Turnaround Time: %d%n",
