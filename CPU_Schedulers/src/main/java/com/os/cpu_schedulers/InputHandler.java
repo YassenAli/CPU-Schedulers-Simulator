@@ -1,8 +1,11 @@
 package com.os.cpu_schedulers;
 
-import javax.swing.*;
 import java.awt.Color;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+import javax.swing.JFrame;
 
 public class InputHandler extends JFrame {
     public static List<Process> getProcesses() {
@@ -31,8 +34,11 @@ public class InputHandler extends JFrame {
             System.out.print("Priority (optional, enter 0 if not used): ");
             int priority = scanner.nextInt();
 
+            System.out.print("Quantum Time: ");
+            int quantum = scanner.nextInt();
+
             // Create and add the process
-            Process process = new Process(name, color, arrivalTime, burstTime, priority, 0, 0);
+            Process process = new Process(name, color, arrivalTime, burstTime, priority, quantum, 0);
             processes.add(process);
         }
 

@@ -17,7 +17,8 @@ public class Process {
     private boolean hasExecuted40;
     private double FCAIFactor;
 
-    public Process(String name, Color color, int arrivalTime, int burstTime, int priority, int quantumTime, int waitingTime) {
+    public Process(String name, Color color, int arrivalTime, int burstTime, int priority, int quantumTime,
+            int waitingTime) {
         this.name = name;
         this.color = color;
         this.arrivalTime = arrivalTime;
@@ -127,6 +128,7 @@ public class Process {
     public void setHasExecuted40(boolean hasExecuted40) {
         this.hasExecuted40 = hasExecuted40;
     }
+
     @Override
     public String toString() {
         return String.format(
