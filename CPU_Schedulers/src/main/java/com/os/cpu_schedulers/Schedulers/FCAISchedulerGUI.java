@@ -2,114 +2,208 @@ package com.os.cpu_schedulers.Schedulers;
 
 import com.os.cpu_schedulers.ChooseSchedularGUI;
 import com.os.cpu_schedulers.Process;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class FCAISchedulerGUI extends JFrame {
-    private FCAIScheduler fcaiScheduler;
+    private FCAIScheduler scheduler;
+    private List<Process> processList;
 
-    public FCAISchedulerGUI(ArrayList<Process> processList) {
-        setTitle("FCAI Scheduler Results");
+    public FCAISchedulerGUI(List<Process> processList) {
+        this.processList = processList;
+        this.scheduler = new FCAIScheduler();
+
+        // Schedule processes
+        scheduler.schedule(processList);
+
+        // Frame configuration
+        setTitle("FCAI Scheduler with Gantt Chart");
+        setSize(900, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-        setSize(800, 600);
         setLocationRelativeTo(null);
 
-        // Instantiate FCAIScheduler and execute the schedule
-        fcaiScheduler = new FCAIScheduler();
-        fcaiScheduler.schedule(processList);
+        // Create main panel
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BorderLayout());
 
-        // Create panels
-        JPanel resultsPanel = new JPanel();
-        resultsPanel.setLayout(new BoxLayout(resultsPanel, BoxLayout.Y_AXIS));
-        add(new JScrollPane(resultsPanel), BorderLayout.EAST);
+        // Add Gantt chart panel
+        JPanel ganttPanel = createGanttChartPanel(scheduler.getExecutionOrder(), processList);
+        ganttPanel.setPreferredSize(new Dimension(800, 200));
+        mainPanel.add(ganttPanel, BorderLayout.NORTH);
 
-        JPanel ganttChartPanel = new JPanel();
-        ganttChartPanel.setLayout(new BorderLayout());
-        add(ganttChartPanel, BorderLayout.CENTER);
+        // Add process metrics table
+        JTable table = createMetricsTable(processList);
+        JScrollPane scrollPane = new JScrollPane(table);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Add Gantt chart
-        GanttChartPanel chartPanel = new GanttChartPanel(processList);
-        chartPanel.setPreferredSize(new Dimension(700, 200));
-        ganttChartPanel.add(chartPanel, BorderLayout.CENTER);
+        // Add Quantum history table
+        JTable quantumTable = createQuantumHistoryTable(scheduler);
+        JScrollPane quantumScrollPane = new JScrollPane(quantumTable);
+        mainPanel.add(quantumScrollPane, BorderLayout.SOUTH);
 
-        // Add process details
-        JLabel processDetailsLabel = new JLabel("Process Details:");
-        processDetailsLabel.setFont(new Font("Arial", Font.BOLD, 16));
-        resultsPanel.add(processDetailsLabel);
-
-        JTextArea processDetailsArea = new JTextArea();
-        processDetailsArea.setEditable(false);
-        StringBuilder processDetails = new StringBuilder();
-        for (Process process : processList) {
-            processDetails.append(String.format("Process %s - Waiting Time: %d, Turnaround Time: %d%n",
-                    process.getName(), process.getWaitingTime(), process.getTurnaroundTime()));
-        }
-        processDetailsArea.setText(processDetails.toString());
-        resultsPanel.add(new JScrollPane(processDetailsArea));
-
-        // Back button
-        JButton backButton = new JButton("Back to Scheduler Selection");
+        // Add navigation buttons
+        JPanel buttonPanel = new JPanel();
+        JButton backButton = new JButton("Back to Schedulers");
         backButton.addActionListener(e -> {
-            new ChooseSchedularGUI(processList, 0); // Replace `0` with actual context switch time if needed
-            dispose();
+            dispose(); // Close current window
+            new ChooseSchedularGUI((ArrayList<Process>) processList, 0);
         });
-        resultsPanel.add(backButton);
 
+        buttonPanel.add(backButton);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        add(mainPanel);
         setVisible(true);
+
+        // Show averages
+        JOptionPane.showMessageDialog(this,
+                "Average Waiting Time: " + scheduler.getAverageWaitingTime() +
+                        "\nAverage Turnaround Time: " + scheduler.getAverageTurnaroundTime(),
+                "Averages", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    class GanttChartPanel extends JPanel {
-        private List<Process> processes;
+    private JPanel createGanttChartPanel(List<ExecutionEntry> executionOrder, List<Process> processes) {
+        // Convert execution order to Gantt chart segments
+        ArrayList<GanttSegment> segments = new ArrayList<>();
+//        for (String order : executionOrder) {
+//            String[] parts = order.split(" ");
+//            if (parts[1].equals("completed")) {
+//                continue;
+//            }
+//            Process process = processes.stream()
+//                    .filter(p -> p.getName().equals(parts[1]))
+//                    .findFirst().orElse(null);
+//            if (process != null) {
+//                segments.add(new GanttSegment(process.getName(), process.getArrivalTime(),
+//                        process.getCompletionTime(), process.getColor()));
+//            }
+//        }
+        for (ExecutionEntry entry : executionOrder) {
+            Process key = entry.getProcess(); // Get the Process object
+            Map<Integer, Integer> value = entry.getDetails(); // Get the associated Map<Integer, Integer>
 
-        public GanttChartPanel(List<Process> processes) {
-            this.processes = processes;
+            // Iterate through the inner map
+            for (Map.Entry<Integer, Integer> innerEntry : value.entrySet()) {
+                Integer innerKey = innerEntry.getKey();
+                Integer innerValue = innerEntry.getValue();
+
+                // Assuming 'segments' is your list and 'process' is defined somewhere in your scope
+                if (key != null) { // Check if key (Process object) is not null
+                    segments.add(new GanttSegment(key.getName(), innerKey, innerValue, key.getColor()));
+                }
+            }
+        }
+
+        return new GanttChartPanel(segments);
+    }
+
+    private JTable createMetricsTable(List<Process> processes) {
+        String[] columnNames = {"Process", "Waiting Time", "Turnaround Time"};
+        String[][] data = new String[processes.size()][3];
+        int index = 0;
+
+        for (Process process : processes) {
+            data[index][0] = process.getName();
+            data[index][1] = String.valueOf(process.getWaitingTime());
+            data[index][2] = String.valueOf(process.getTurnaroundTime());
+            index++;
+        }
+
+        return new JTable(data, columnNames);
+    }
+
+    private JTable createQuantumHistoryTable(FCAIScheduler scheduler) {
+        Map<String, List<Integer>> quantumHistory = scheduler.getQuantumHistory();
+        String[] columnNames = {"Process", "Quantum History"};
+        String[][] data = new String[quantumHistory.size()][2];
+        int index = 0;
+
+        for (Map.Entry<String, List<Integer>> entry : quantumHistory.entrySet()) {
+            data[index][0] = entry.getKey();
+            data[index][1] = entry.getValue().toString();
+            index++;
+        }
+
+        return new JTable(data, columnNames);
+    }
+
+    public class GanttSegment {
+        private String label;
+        private int startTime;
+        private int endTime;
+        private Color color;
+        public GanttSegment(String label, int startTime, int endTime, Color color) {
+            this.label = label;
+            this.startTime = startTime;
+            this.endTime = endTime;
+            this.color = color;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public int getStartTime() {
+            return startTime;
+        }
+
+        public int getEndTime() {
+            return endTime;
+        }
+
+        public Color getColor() {
+            return color;
+        }
+        public void setColor(Color color) {
+            this.color = color;
+        }
+    }
+    static class GanttChartPanel extends JPanel {
+        private final ArrayList<GanttSegment> segments;
+
+        public GanttChartPanel(ArrayList<GanttSegment> segments) {
+            this.segments = segments;
+            setBackground(Color.WHITE);
         }
 
         @Override
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
-
-            if (processes.isEmpty()) return;
-
-            int currentTime = 20; // Start time for the chart
-            int height = 50; // Height of each process bar
-            int yPosition = 50; // Vertical position of the bar
-            int chartWidth = getWidth() - 40; // Leave some padding on the sides
-
-            // Calculate total time for scaling
-            int totalTime = 0;
-            for (Process process : processes) {
-                totalTime += process.getBurstTime(); // Sum of all burst times
-            }
-
-            int currentProcessTime = 0;
-            for (Process process : processes) {
-                int burstTime = process.getBurstTime();
-                int processWidth = (int) ((double) burstTime / totalTime * chartWidth);
-
-                // Draw process bar
-                g.setColor(process.getColor());
-                g.fillRect(currentProcessTime, yPosition, processWidth, height);
-
-                // Outline of the process bar
+            if (segments.isEmpty()) {
                 g.setColor(Color.BLACK);
-                g.drawRect(currentProcessTime, yPosition, processWidth, height);
-
-                // Draw process name
-                g.drawString(process.getName(), currentProcessTime + 5, yPosition + 20);
-
-                // Draw burst time
-                g.drawString("T: " + burstTime, currentProcessTime + 5, yPosition + 40);
-
-                currentProcessTime += processWidth; // Move to the next position for the next process
+                g.drawString("No data available for Gantt chart", 50, 50);
+                return;
             }
 
-            // Draw the final time marker (end of the last process)
-            g.drawString(String.valueOf(totalTime), currentProcessTime - 10, yPosition + 70);
+            int x = 50, y = 50, height = 50;
+
+            for (GanttSegment segment : segments) {
+                int width = (segment.getEndTime() - segment.getStartTime()) * 20; // Scale each unit time to 20 pixels
+                g.setColor(segment.getColor());
+                g.fillRect(x, y, width, height);
+                g.setColor(Color.BLACK);
+                g.drawRect(x, y, width, height);
+                g.drawString(segment.getLabel(), x + width / 2 - 10, y + height / 2);
+                g.drawString(String.valueOf(segment.getStartTime()), x - 5, y + height + 15);
+                x += width;
+            }
+            g.drawString(String.valueOf(segments.get(segments.size() - 1).getEndTime()), x - 5, y + height + 15);
         }
+
+    }
+
+    public static void main(String[] args) {
+
+        List<Process> processesFCAI = new ArrayList<>();
+        processesFCAI.add(new Process("P1", Color.RED, 0, 17, 4, 4));
+        processesFCAI.add(new Process("P2", Color.BLUE, 3, 6, 9, 3));
+        processesFCAI.add(new Process("P3", Color.GREEN, 4, 10, 3, 5));
+        processesFCAI.add(new Process("P4", Color.YELLOW, 29, 4, 10, 2));
+
+        SwingUtilities.invokeLater(() -> new FCAISchedulerGUI(processesFCAI));
     }
 }

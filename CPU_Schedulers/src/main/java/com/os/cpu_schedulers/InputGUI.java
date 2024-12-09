@@ -176,10 +176,14 @@ public class InputGUI extends JFrame {
         int priority = Integer.parseInt(priorityField.getText().trim());
         int quantumTime = Integer.parseInt(quantumTimeField.getText().trim());
 
-        // Create a new Process object and add it to the list
+//         Create a new Process object and add it to the list
         Process process = new Process(processName, selectedColor, arrivalTime, burstTime, priority , quantumTime , 0);
         processList.add(process);
-
+//        processList.add(new Process("P1", Color.RED, 0, 17, 4, 4));
+//        processList.add(new Process("P2", Color.BLUE, 3, 6, 9, 3));
+//        processList.add(new Process("P3", Color.GREEN, 4, 10, 3, 5));
+//        processList.add(new Process("P4", Color.YELLOW, 29, 4, 10, 2));
+//
         System.out.println("Process " + currentProcessIndex + ":");
         System.out.println("Name: " + processName);
         System.out.println("Color: " + selectedColor);
