@@ -10,16 +10,14 @@ import java.util.Map;
 
 public class FCAISchedulerGUI extends JFrame {
     private FCAIScheduler scheduler;
-    private ArrayList<Process> processList;
+    private List<Process> processList;
 
-    public FCAISchedulerGUI(ArrayList<Process> processList) {
+    public FCAISchedulerGUI(List<Process> processList) {
         this.processList = processList;
         this.scheduler = new FCAIScheduler();
 
-        List<Process> givenProcess = new ArrayList<>(processList);
-
         // Schedule processes
-        scheduler.schedule(givenProcess);
+        scheduler.schedule(processList);
 
         // Frame configuration
         setTitle("FCAI Scheduler with Gantt Chart");
@@ -50,7 +48,11 @@ public class FCAISchedulerGUI extends JFrame {
         // Add navigation buttons
         JPanel buttonPanel = new JPanel();
         JButton backButton = new JButton("Back to Schedulers");
-        backButton.addActionListener(e -> dispose()); // Close the window
+        backButton.addActionListener(e -> {
+            dispose(); // Close current window
+            new ChooseSchedularGUI((ArrayList<Process>) processList, 0);
+        });
+
         buttonPanel.add(backButton);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -64,27 +66,42 @@ public class FCAISchedulerGUI extends JFrame {
                 "Averages", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private JPanel createGanttChartPanel(List<String> executionOrder, ArrayList<Process> processes) {
+    private JPanel createGanttChartPanel(List<ExecutionEntry> executionOrder, List<Process> processes) {
         // Convert execution order to Gantt chart segments
         ArrayList<GanttSegment> segments = new ArrayList<>();
-        for (String order : executionOrder) {
-            String[] parts = order.split(" ");
-            if (parts[1].equals("completed")) {
-                continue;
-            }
-            Process process = processes.stream()
-                    .filter(p -> p.getName().equals(parts[1]))
-                    .findFirst().orElse(null);
-            if (process != null) {
-                segments.add(new GanttSegment(process.getName(), process.getArrivalTime(),
-                        process.getCompletionTime(), process.getColor()));
+//        for (String order : executionOrder) {
+//            String[] parts = order.split(" ");
+//            if (parts[1].equals("completed")) {
+//                continue;
+//            }
+//            Process process = processes.stream()
+//                    .filter(p -> p.getName().equals(parts[1]))
+//                    .findFirst().orElse(null);
+//            if (process != null) {
+//                segments.add(new GanttSegment(process.getName(), process.getArrivalTime(),
+//                        process.getCompletionTime(), process.getColor()));
+//            }
+//        }
+        for (ExecutionEntry entry : executionOrder) {
+            Process key = entry.getProcess(); // Get the Process object
+            Map<Integer, Integer> value = entry.getDetails(); // Get the associated Map<Integer, Integer>
+
+            // Iterate through the inner map
+            for (Map.Entry<Integer, Integer> innerEntry : value.entrySet()) {
+                Integer innerKey = innerEntry.getKey();
+                Integer innerValue = innerEntry.getValue();
+
+                // Assuming 'segments' is your list and 'process' is defined somewhere in your scope
+                if (key != null) { // Check if key (Process object) is not null
+                    segments.add(new GanttSegment(key.getName(), innerKey, innerValue, key.getColor()));
+                }
             }
         }
 
         return new GanttChartPanel(segments);
     }
 
-    private JTable createMetricsTable(ArrayList<Process> processes) {
+    private JTable createMetricsTable(List<Process> processes) {
         String[] columnNames = {"Process", "Waiting Time", "Turnaround Time"};
         String[][] data = new String[processes.size()][3];
         int index = 0;
@@ -180,13 +197,13 @@ public class FCAISchedulerGUI extends JFrame {
     }
 
     public static void main(String[] args) {
-        // Example process list
-        ArrayList<Process> processes = new ArrayList<>();
-        processes.add(new Process("P1", Color.RED, 0, 17, 4, 4));
-        processes.add(new Process("P2", Color.BLUE, 3, 6, 9, 3));
-        processes.add(new Process("P3", Color.GREEN, 4, 10, 3, 5));
-        processes.add(new Process("P4", Color.YELLOW, 29, 4, 10, 2));
 
-        SwingUtilities.invokeLater(() -> new FCAISchedulerGUI(processes));
+        List<Process> processesFCAI = new ArrayList<>();
+        processesFCAI.add(new Process("P1", Color.RED, 0, 17, 4, 4));
+        processesFCAI.add(new Process("P2", Color.BLUE, 3, 6, 9, 3));
+        processesFCAI.add(new Process("P3", Color.GREEN, 4, 10, 3, 5));
+        processesFCAI.add(new Process("P4", Color.YELLOW, 29, 4, 10, 2));
+
+        SwingUtilities.invokeLater(() -> new FCAISchedulerGUI(processesFCAI));
     }
 }

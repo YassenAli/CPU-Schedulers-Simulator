@@ -17,8 +17,7 @@ public class FCAIScheduler implements Scheduler {
     private double averageWaitingTime;
     private double averageTurnaroundTime;
     private List<Process> readyQueue;
-    private List<String> executionOrder;
-
+    private List<ExecutionEntry> executionOrder;
     public FCAIScheduler() {
         readyQueue = new ArrayList<>();
         executionOrder = new ArrayList<>();
@@ -79,6 +78,7 @@ public class FCAIScheduler implements Scheduler {
                     System.out.printf(
                             "Time %d: Context switching: %s preempts %s, runs for %d units, remaining burst = %d.\n",
                             curTime, curProcess.getName(), first.getName(), execTime, curProcess.getRemainingTime());
+                    executionOrder.add(new ExecutionEntry(first, Map.of(curTime - execTime, curTime)));
                     curTime += contextSwitchTime;
                     readyQueue.removeFirst();
                     readyQueue.remove(curProcess);
@@ -94,7 +94,10 @@ public class FCAIScheduler implements Scheduler {
                 curProcess.setRemainingTime(curProcess.getRemainingTime() - execTime);
                 System.out.printf("Time %d: %s starts execution, runs for %d units, remaining burst = %d.\n",
                         curTime, curProcess.getName(), execTime, curProcess.getRemainingTime());
+//                executionOrder.add(new ExecutionEntry(curProcess, Map.of(curTime - execTime, curTime)));
+                curProcess.setStartTime(curTime);
                 curTime += execTime;
+//                executionOrder.add(new ExecutionEntry(curProcess, Map.of(curTime - execTime, curTime)));
             } else if (execTime < curProcess.getQuantumTime()) {
                 // Continue executing the current process
                 execTime++;
@@ -111,6 +114,10 @@ public class FCAIScheduler implements Scheduler {
                             "Time %d: Context switching: %s preempts %s, runs for %d units, remaining burst = %d.\n",
                             curTime, readyQueue.getFirst().getName(), curProcess.getName(), execTime,
                             curProcess.getRemainingTime());
+//                    Map<Integer, Integer> innerMap = new HashMap<>();
+//                    innerMap.put(curTime - execTime, curTime);
+//                    executionOrder.put(curProcess, innerMap);
+                    executionOrder.add(new ExecutionEntry(curProcess, Map.of(curTime - execTime, curTime)));
                     curTime += contextSwitchTime;
                     execTime = 0;
                 }
@@ -119,6 +126,10 @@ public class FCAIScheduler implements Scheduler {
             if (curProcess.getRemainingTime() == 0) {
                 // Process completes execution
                 System.out.printf("Time %d: Process %s has completed execution\n", curTime, curProcess.getName());
+                ExecutionEntry completed = new ExecutionEntry(curProcess, Map.of(curTime - execTime, curTime));
+                if(!executionOrder.contains(completed)) {
+                    executionOrder.add(completed);
+                }
                 finalizeProcess(curProcess, curTime);
                 completedProcesses.add(curProcess);
                 readyQueue.removeFirst();
@@ -130,6 +141,7 @@ public class FCAIScheduler implements Scheduler {
 
     private void initializeProcesses(List<Process> processes) {
         this.processes = new ArrayList<>(processes);
+        System.out.println(processes.size()+" initialize "+processes.get(0).getArrivalTime());
         this.processes.sort(Comparator.comparingInt(Process::getArrivalTime));
         for (Process process : this.processes) {
             process.setHasExecuted40(false);
@@ -165,7 +177,7 @@ public class FCAIScheduler implements Scheduler {
         process.setCompletionTime(currentTime);
         process.setTurnaroundTime(currentTime - process.getArrivalTime());
         process.setWaitingTime(process.getTurnaroundTime() - process.getBurstTime());
-        executionOrder.add(process.getName() + " completed");
+//        executionOrder.add(process);
     }
 
     private void calculateAndPrintResults(Set<Process> completedProcesses) {
@@ -190,7 +202,7 @@ public class FCAIScheduler implements Scheduler {
         System.out.printf("\nAverage Waiting Time: %.2f\n", averageWaitingTime);
         System.out.printf("Average Turnaround Time: %.2f\n", averageTurnaroundTime);
     }
-    public List<String> getExecutionOrder() {
+    public List<ExecutionEntry> getExecutionOrder() {
         return executionOrder;
     }
 
@@ -204,7 +216,10 @@ public class FCAIScheduler implements Scheduler {
 
     @Override
     public void printResults() {
-        System.out.println("\nExecution Order: " + String.join(" -> ", executionOrder));
+//        System.out.println("\nExecution Order: ");
+//        for (int i = 0; i < executionOrder.size(); ++i){
+//            System.out.println("%s completed -> "+executionOrder.get(i).getName());
+//        }
         System.out.println("\nQuantum History:");
         for (Map.Entry<String, List<Integer>> entry : quantumHistory.entrySet()) {
             System.out.printf("Process %s: %s%n", entry.getKey(), entry.getValue());
