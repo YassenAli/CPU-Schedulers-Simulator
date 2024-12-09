@@ -69,30 +69,16 @@ public class FCAISchedulerGUI extends JFrame {
     private JPanel createGanttChartPanel(List<ExecutionEntry> executionOrder, List<Process> processes) {
         // Convert execution order to Gantt chart segments
         ArrayList<GanttSegment> segments = new ArrayList<>();
-//        for (String order : executionOrder) {
-//            String[] parts = order.split(" ");
-//            if (parts[1].equals("completed")) {
-//                continue;
-//            }
-//            Process process = processes.stream()
-//                    .filter(p -> p.getName().equals(parts[1]))
-//                    .findFirst().orElse(null);
-//            if (process != null) {
-//                segments.add(new GanttSegment(process.getName(), process.getArrivalTime(),
-//                        process.getCompletionTime(), process.getColor()));
-//            }
-//        }
         for (ExecutionEntry entry : executionOrder) {
-            Process key = entry.getProcess(); // Get the Process object
-            Map<Integer, Integer> value = entry.getDetails(); // Get the associated Map<Integer, Integer>
+            Process key = entry.getProcess();
+            Map<Integer, Integer> value = entry.getDetails();
 
             // Iterate through the inner map
             for (Map.Entry<Integer, Integer> innerEntry : value.entrySet()) {
                 Integer innerKey = innerEntry.getKey();
                 Integer innerValue = innerEntry.getValue();
 
-                // Assuming 'segments' is your list and 'process' is defined somewhere in your scope
-                if (key != null) { // Check if key (Process object) is not null
+                if (key != null) {
                     segments.add(new GanttSegment(key.getName(), innerKey, innerValue, key.getColor()));
                 }
             }
@@ -197,7 +183,6 @@ public class FCAISchedulerGUI extends JFrame {
     }
 
     public static void main(String[] args) {
-
         List<Process> processesFCAI = new ArrayList<>();
         processesFCAI.add(new Process("P1", Color.RED, 0, 17, 4, 4));
         processesFCAI.add(new Process("P2", Color.BLUE, 3, 6, 9, 3));
