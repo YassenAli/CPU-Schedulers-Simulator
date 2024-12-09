@@ -68,7 +68,7 @@ public class CPU_Schedulers {
             }
             case 4 -> {
                 scheduler = new FCAIScheduler();
-                scheduler.schedule(processes);
+                scheduler.schedule(new ArrayList<>(processes));
                 scheduler.printResults();
             }
             default -> throw new IllegalArgumentException("Invalid choice");

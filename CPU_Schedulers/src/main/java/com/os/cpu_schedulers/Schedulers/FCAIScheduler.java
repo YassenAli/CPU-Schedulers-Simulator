@@ -114,12 +114,14 @@ public class FCAIScheduler implements Scheduler {
                             "Time %d: Context switching: %s preempts %s, runs for %d units, remaining burst = %d.\n",
                             curTime, readyQueue.getFirst().getName(), curProcess.getName(), execTime,
                             curProcess.getRemainingTime());
-//                    Map<Integer, Integer> innerMap = new HashMap<>();
-//                    innerMap.put(curTime - execTime, curTime);
-//                    executionOrder.put(curProcess, innerMap);
+
                     executionOrder.add(new ExecutionEntry(curProcess, Map.of(curTime - execTime, curTime)));
                     curTime += contextSwitchTime;
                     execTime = 0;
+                } else {
+                    int lastQuantum = quantumHistory.get(curProcess.getName()).removeLast();
+                    int beforeLastQuantum = quantumHistory.get(curProcess.getName()).removeLast();
+                    quantumHistory.get(curProcess.getName()).add(lastQuantum + beforeLastQuantum - 2);
                 }
             }
 
