@@ -216,4 +216,7 @@ public class FCAIScheduler implements Scheduler {
         return executionTimes;
     }
 
+    public Map<String, List<Integer>> getQuantumHistory() {
+        return quantumHistory;
+    }
 }

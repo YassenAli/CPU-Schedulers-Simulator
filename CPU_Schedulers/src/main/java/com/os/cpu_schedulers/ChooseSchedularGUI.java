@@ -108,6 +108,11 @@ public class ChooseSchedularGUI extends JFrame {
         FCAISchedulerButton.setFocusPainted(false);
 
         mainPanel.add(FCAISchedulerButton);
+//        ArrayList<Process> MyProcess = new ArrayList<>();
+//        MyProcess.add(new Process("P1", Color.RED, 0, 17, 4, 4));
+//        MyProcess.add(new Process("P2", Color.BLUE, 3, 6, 9, 3));
+//        MyProcess.add(new Process("P3", Color.GREEN, 4, 10, 3, 5));
+//        MyProcess.add(new Process("P4", Color.YELLOW, 29, 4, 10, 2));
 
         FCAISchedulerButton.addActionListener(e -> {
             FCAISchedulerGUI fcaiSchedulerGUI = new FCAISchedulerGUI(processList);
