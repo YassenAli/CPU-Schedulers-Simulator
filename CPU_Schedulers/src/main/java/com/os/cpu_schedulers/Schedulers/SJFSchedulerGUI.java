@@ -1,5 +1,6 @@
 package com.os.cpu_schedulers.Schedulers;
 
+import com.os.cpu_schedulers.ChooseSchedularGUI;
 import com.os.cpu_schedulers.Process;
 
 import javax.swing.*;
@@ -66,6 +67,17 @@ public class SJFSchedulerGUI extends JFrame {
         GanttChartPanel ganttChartPanel = new GanttChartPanel(executionOrder);
         ganttChartPanel.setPreferredSize(new Dimension(600, 200));
         add(ganttChartPanel, BorderLayout.CENTER);
+
+        JPanel buttonPanel = new JPanel();
+        JButton backButton = new JButton("Back to Schedulers");
+        backButton.addActionListener(e -> {
+            dispose(); // Close current window
+            new ChooseSchedularGUI((ArrayList<Process>) processList, 0);
+        });
+
+        buttonPanel.add(backButton);
+        add(buttonPanel, BorderLayout.SOUTH);
+
         validate();
     }
 

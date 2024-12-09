@@ -1,5 +1,6 @@
 package com.os.cpu_schedulers.Schedulers;
 
+import com.os.cpu_schedulers.ChooseSchedularGUI;
 import com.os.cpu_schedulers.Process;
 
 import javax.swing.*;
@@ -32,6 +33,16 @@ public class SRTFSchedulerGUI extends JFrame {
 
         // Call the method to schedule and display the results
         scheduleProcesses(panel);
+
+        JPanel buttonPanel = new JPanel();
+        JButton backButton = new JButton("Back to Schedulers");
+        backButton.addActionListener(e -> {
+            dispose(); // Close current window
+            new ChooseSchedularGUI((ArrayList<Process>) processList, 0);
+        });
+
+        buttonPanel.add(backButton);
+        add(buttonPanel, BorderLayout.SOUTH);
 
         // Add the main panel inside a JScrollPane to make the entire window scrollable
         JScrollPane scrollPane = new JScrollPane(panel);
