@@ -40,6 +40,14 @@ public class Process {
         this.quantumTime = quantumTime;
     }
 
+    public Process(String name, Color color, int arrivalTime, int burstTime, int priority) {
+        this.name = name;
+        this.color = color;
+        this.arrivalTime = arrivalTime;
+        this.burstTime = burstTime;
+        this.priority = priority;
+    }
+
     public String getName() {
         return name;
     }

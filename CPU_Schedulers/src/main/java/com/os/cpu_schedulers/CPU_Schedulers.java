@@ -32,10 +32,10 @@ public class CPU_Schedulers {
         } else if (inputChoice == 2) {
             processes = readProcessesFromFile();
         } else if (inputChoice == 3) {
-            processes.add(new Process("P1", Color.RED, 0, 17, 4, 4));
-            processes.add(new Process("P2", Color.BLUE, 3, 6, 9, 3));
-            processes.add(new Process("P3", Color.GREEN, 4, 10, 3, 5));
-            processes.add(new Process("P4", Color.YELLOW, 29, 4, 10, 2));
+            processes.add(new Process("P1", Color.RED, 0, 17, 4, 4, 0));
+            processes.add(new Process("P2", Color.BLUE, 3, 6, 9, 3, 0));
+            processes.add(new Process("P3", Color.GREEN, 4, 10, 3, 5, 0));
+            processes.add(new Process("P4", Color.YELLOW, 29, 4, 10, 2, 0));
         } else {
             throw new IllegalArgumentException("Invalid choice for input method.");
         }

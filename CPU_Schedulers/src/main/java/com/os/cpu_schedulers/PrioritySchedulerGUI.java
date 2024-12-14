@@ -105,6 +105,16 @@ public class PrioritySchedulerGUI extends JFrame {
         JScrollPane scrollPane = new JScrollPane(table);
         mainPanel.add(scrollPane, BorderLayout.SOUTH);
 
+        JPanel buttonPanel = new JPanel();
+        JButton backButton = new JButton("Back to Schedulers");
+        backButton.addActionListener(e -> {
+            dispose(); // Close current window
+            new ChooseSchedularGUI((ArrayList<Process>) processList, 0);
+        });
+
+        buttonPanel.add(backButton);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
         add(mainPanel);
         setVisible(true);
 
@@ -115,7 +125,7 @@ public class PrioritySchedulerGUI extends JFrame {
 
     public static void main(String[] args) {
         // Example process list
-//        ArrayList<Process> processes = new ArrayList<>();
+        ArrayList<Process> processes = new ArrayList<>();
 //        processes.add(new Process("P1", Color.RED, 0, 8, 3));
 //        processes.add(new Process("P2", Color.BLUE, 2, 5, 1));
 //        processes.add(new Process("P3", Color.GREEN, 4, 2, 2));
