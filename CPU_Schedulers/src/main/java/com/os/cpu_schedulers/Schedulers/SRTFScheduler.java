@@ -8,7 +8,7 @@ import java.util.List;
 public class SRTFScheduler implements Scheduler {
     private List<Process> processes;
     private List<Process> executionOrder = new ArrayList<>();
-    private final int contextSwitchingTime = 1;
+    private int contextSwitchingTime = 1;
 
     public SRTFScheduler(List<Process> processes) {
         this.processes = processes;
@@ -93,6 +93,12 @@ public class SRTFScheduler implements Scheduler {
         float averageTurnaroundTime = (float) totalTurnaroundTime / processes.size();
         System.out.println("\nAverage Waiting Time: " + averageWaitTime);
         System.out.println("Average Turnaround Time: " + averageTurnaroundTime);
+    }
+    public void setContextSwitchingTime(int contextSwitchingTime) {
+        this.contextSwitchingTime =  contextSwitchingTime;
+    }
+    public int getContextSwitchingTime() {
+        return contextSwitchingTime;
     }
 
     public List<Process> getExecutionOrder() {

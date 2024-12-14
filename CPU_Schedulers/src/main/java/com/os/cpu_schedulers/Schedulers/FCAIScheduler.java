@@ -94,10 +94,8 @@ public class FCAIScheduler implements Scheduler {
                 curProcess.setRemainingTime(curProcess.getRemainingTime() - execTime);
                 System.out.printf("Time %d: %s starts execution, runs for %d units, remaining burst = %d.\n",
                         curTime, curProcess.getName(), execTime, curProcess.getRemainingTime());
-//                executionOrder.add(new ExecutionEntry(curProcess, Map.of(curTime - execTime, curTime)));
                 curProcess.setStartTime(curTime);
                 curTime += execTime;
-//                executionOrder.add(new ExecutionEntry(curProcess, Map.of(curTime - execTime, curTime)));
             } else if (execTime < curProcess.getQuantumTime()) {
                 // Continue executing the current process
                 execTime++;
