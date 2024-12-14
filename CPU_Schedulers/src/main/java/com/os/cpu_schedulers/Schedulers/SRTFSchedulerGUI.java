@@ -143,6 +143,11 @@ public class SRTFSchedulerGUI extends JFrame {
     public static void main(String[] args) {
         // Add sample processes for testing
         ArrayList<Process> processes = new ArrayList<>();
+        processes.add(new Process("P1", Color.RED, 0, 17, 4, 4, 0));
+        processes.add(new Process("P2", Color.BLUE, 3, 6, 9, 3, 0));
+        processes.add(new Process("P3", Color.GREEN, 4, 10, 3, 5, 0));
+        processes.add(new Process("P4", Color.YELLOW, 29, 4, 10, 2, 0));
+
         new SRTFSchedulerGUI(processes);
     }
 }

@@ -43,7 +43,7 @@ public class FCAISchedulerGUI extends JFrame {
         // Add Quantum history table
         JTable quantumTable = createQuantumHistoryTable(scheduler);
         JScrollPane quantumScrollPane = new JScrollPane(quantumTable);
-        mainPanel.add(quantumScrollPane, BorderLayout.SOUTH);
+        mainPanel.add(quantumScrollPane, BorderLayout.WEST);
 
         // Add navigation buttons
         JPanel buttonPanel = new JPanel();
@@ -184,10 +184,10 @@ public class FCAISchedulerGUI extends JFrame {
 
     public static void main(String[] args) {
         List<Process> processesFCAI = new ArrayList<>();
-        processesFCAI.add(new Process("P1", Color.RED, 0, 17, 4, 4));
-        processesFCAI.add(new Process("P2", Color.BLUE, 3, 6, 9, 3));
-        processesFCAI.add(new Process("P3", Color.GREEN, 4, 10, 3, 5));
-        processesFCAI.add(new Process("P4", Color.YELLOW, 29, 4, 10, 2));
+        processesFCAI.add(new Process("P1", Color.RED, 0, 17, 4, 4, 0));
+        processesFCAI.add(new Process("P2", Color.BLUE, 3, 6, 9, 3, 0));
+        processesFCAI.add(new Process("P3", Color.GREEN, 4, 10, 3, 5, 0));
+        processesFCAI.add(new Process("P4", Color.YELLOW, 29, 4, 10, 2, 0));
 
         SwingUtilities.invokeLater(() -> new FCAISchedulerGUI(processesFCAI));
     }
