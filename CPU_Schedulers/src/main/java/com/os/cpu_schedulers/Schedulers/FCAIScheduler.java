@@ -143,10 +143,8 @@ public class FCAIScheduler implements Scheduler {
 
     private void initializeProcesses(List<Process> processes) {
         this.processes = new ArrayList<>(processes);
-        System.out.println(processes.size()+" initialize "+processes.get(0).getArrivalTime());
         this.processes.sort(Comparator.comparingInt(Process::getArrivalTime));
         for (Process process : this.processes) {
-            process.setHasExecuted40(false);
             quantumHistory.put(process.getName(), new ArrayList<>(List.of(process.getQuantumTime())));
         }
     }
@@ -158,7 +156,8 @@ public class FCAIScheduler implements Scheduler {
         // not Math.ceil
         this.V1 = lastArrivalTime / 10.0;
         this.V2 = maxBurstTime / 10.0;
-        System.out.println("V1 and V2: " + V1 + " " + V2);
+        System.out.println("\nV1 and V2: " + V1 + " " + V2);
+        System.out.println("");
     }
 
     private double getLastArrivalTime() {
@@ -179,7 +178,6 @@ public class FCAIScheduler implements Scheduler {
         process.setCompletionTime(currentTime);
         process.setTurnaroundTime(currentTime - process.getArrivalTime());
         process.setWaitingTime(process.getTurnaroundTime() - process.getBurstTime());
-//        executionOrder.add(process);
     }
 
     private void calculateAndPrintResults(Set<Process> completedProcesses) {
@@ -191,8 +189,9 @@ public class FCAIScheduler implements Scheduler {
             totalTurnaroundTime += process.getTurnaroundTime();
         }
 
-        averageWaitingTime = (double) totalWaitingTime / completedProcesses.size();
-        averageTurnaroundTime = (double) totalTurnaroundTime / completedProcesses.size();
+        this.averageWaitingTime = (double) totalWaitingTime / completedProcesses.size();
+        this.averageTurnaroundTime = (double) totalTurnaroundTime / completedProcesses.size();
+
 
         // printResults();
         System.out.println("\nProcess Details:");
@@ -218,19 +217,10 @@ public class FCAIScheduler implements Scheduler {
 
     @Override
     public void printResults() {
-//        System.out.println("\nExecution Order: ");
-//        for (int i = 0; i < executionOrder.size(); ++i){
-//            System.out.println("%s completed -> "+executionOrder.get(i).getName());
-//        }
         System.out.println("\nQuantum History:");
         for (Map.Entry<String, List<Integer>> entry : quantumHistory.entrySet()) {
             System.out.printf("Process %s: %s%n", entry.getKey(), entry.getValue());
         }
-    }
-    private List<Integer> executionTimes = new ArrayList<>();
-
-    public List<Integer> getExecutionTimes() {
-        return executionTimes;
     }
 
     public Map<String, List<Integer>> getQuantumHistory() {
