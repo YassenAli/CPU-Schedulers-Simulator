@@ -109,7 +109,7 @@ public class PrioritySchedulerGUI extends JFrame {
         JButton backButton = new JButton("Back to Schedulers");
         backButton.addActionListener(e -> {
             dispose(); // Close current window
-            new ChooseSchedularGUI((ArrayList<Process>) processList, 0);
+            new ChooseSchedularGUI((ArrayList<Process>) processList, contextSwitch);
         });
 
         buttonPanel.add(backButton);
