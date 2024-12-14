@@ -7,11 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import com.os.cpu_schedulers.Schedulers.FCAIScheduler;
-import com.os.cpu_schedulers.Schedulers.SJFScheduler;
-import com.os.cpu_schedulers.Schedulers.SRTFScheduler;
-import com.os.cpu_schedulers.Schedulers.SRTFSchedulerGUI;
-import com.os.cpu_schedulers.Schedulers.Scheduler;
+import com.os.cpu_schedulers.Schedulers.*;
 
 public class CPU_Schedulers {
 
